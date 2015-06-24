@@ -55,6 +55,12 @@ environment_coverage_ <- function(env, exprs, enc = parent.frame()) {
 #' @param enc the enclosing environment which to run the expressions.
 #' @export
 function_coverage <- function(fun, ..., env = NULL, enc = parent.frame()) {
+  if (is.function(fun)) {
+    env <- environment(fun)
+
+    # get name of function, stripping preceding blah:: if needed
+    fun <- rex::re_substitutes(deparse(substitute(fun)), rex::regex(".*:::?"), "")
+  }
 
   exprs <- dots(...)
 
@@ -102,6 +108,7 @@ function_coverage <- function(fun, ..., env = NULL, enc = parent.frame()) {
 #' @param exclude_pattern a search pattern to look for in the source to exclude a particular line.
 #' @param exclude_start a search pattern to look for in the source to start an exclude block.
 #' @param exclude_end a search pattern to look for in the source to stop an exclude block.
+#' @seealso exclusions
 #' @export
 package_coverage <- function(path = ".",
                              ...,
@@ -110,9 +117,9 @@ package_coverage <- function(path = ".",
                              quiet = TRUE,
                              clean = TRUE,
                              exclusions = NULL,
-                             exclude_pattern = options("covr.exclude_pattern"),
-                             exclude_start = options("covr.exclude_start"),
-                             exclude_end = options("covr.exclude_end")
+                             exclude_pattern = getOption("covr.exclude_pattern"),
+                             exclude_start = getOption("covr.exclude_start"),
+                             exclude_end = getOption("covr.exclude_end")
                              ) {
 
   pkg <- devtools::as.package(path)
@@ -131,6 +138,8 @@ package_coverage <- function(path = ".",
                 vignette = do.call(Recall, c(called_args, type = "vignette")),
                 example = do.call(Recall, c(called_args, type = "example"))
                 )
+
+    attr(res, "package") <- pkg
     class(res) <- "coverages"
     return(res)
   }
@@ -192,6 +201,7 @@ package_coverage <- function(path = ".",
   }
 
   attr(coverage, "type") <- type
+  attr(coverage, "package") <- pkg
   class(coverage) <- "coverage"
 
   # BasicClasses are functions from the method package
@@ -235,7 +245,6 @@ run_tests <- function(pkg, tmp_lib, dots, type, quiet) {
                  options = c(pkg$path,
                              "--no-docs",
                              "--no-multiarch",
-                             "--no-demo",
                              "--preclean",
                              "--with-keep.source",
                              "--no-byte-compile",
@@ -260,6 +269,7 @@ run_tests <- function(pkg, tmp_lib, dots, type, quiet) {
     # get expressions to run
     exprs <-
       c(dots,
+        quote("library(methods)"),
         if (type == "test" && file.exists(testing_dir)) {
           bquote(try(source_dir(path = .(testing_dir), env = .(env), quiet = .(quiet))))
         } else if (type == "vignette" && file.exists(vignette_dir)) {
