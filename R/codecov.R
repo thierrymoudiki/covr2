@@ -25,7 +25,7 @@ codecov <- function(...,
                     quiet = TRUE) {
 
   if (is.null(coverage)) {
-    coverage <- package_coverage(...)
+    coverage <- package_coverage(quiet = quiet, ...)
   }
 
   if (!quiet) {
@@ -37,7 +37,6 @@ codecov <- function(...,
   # -------
   if (Sys.getenv("JENKINS_URL") != "") {
     # https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
-    # path <- Sys.getenv("WORKSPACE")
     codecov_url <- paste0(base_url, "/upload/v2") # nolint
     codecov_query <- list(service = "jenkins",
                           branch = branch %||% Sys.getenv("GIT_BRANCH"),
@@ -49,17 +48,14 @@ codecov <- function(...,
   # ---------
   } else if (Sys.getenv("CI") == "true" && Sys.getenv("TRAVIS") == "true") {
     # http://docs.travis-ci.com/user/ci-environment/#Environment-variables
-    # path <- Sys.getenv("TRAVIS_BUILD_DIR")
-    pr <- ifelse(Sys.getenv("TRAVIS_PULL_REQUEST") != "false", Sys.getenv("TRAVIS_PULL_REQUEST"), "")
     codecov_url <- paste0(base_url, "/upload/v2") # nolint
-    slug_info <- strsplit(Sys.getenv("TRAVIS_REPO_SLUG"), "/")[[1]]
-    codecov_query <- list(service = "travis-org",
-                          branch = branch %||% Sys.getenv("TRAVIS_BRANCH"),
+    codecov_query <- list(branch = branch %||% Sys.getenv("TRAVIS_BRANCH"),
+                          service = "travis",
                           build = Sys.getenv("TRAVIS_JOB_NUMBER"),
-                          pull_request = pr,
-                          travis_job_id = Sys.getenv("TRAVIS_JOB_ID"),
-                          owner = slug_info[1],
-                          repo = slug_info[2],
+                          pr = Sys.getenv("TRAVIS_PULL_REQUEST"),
+                          job = Sys.getenv("TRAVIS_JOB_ID"),
+                          slug = Sys.getenv("TRAVIS_REPO_SLUG"),
+                          root = Sys.getenv("TRAVIS_BUILD_DIR"),
                           commit = commit %||% Sys.getenv("TRAVIS_COMMIT"))
   # --------
   # Codeship
@@ -153,19 +149,18 @@ codecov <- function(...,
 }
 
 to_codecov <- function(x) {
-  coverages <- unname(lapply(per_line(x),
+  coverages <- lapply(per_line(x),
     function(xx) {
       xx$coverage <- c(NA, xx$coverage)
       xx
-    }))
+    })
 
-  res <- lapply(coverages,
-    function(coverage) {
+  res <- Map(function(coverage, name) {
       list(
-        "name" = jsonlite::unbox(display_name(coverage)),
+        "name" = jsonlite::unbox(name),
         "coverage" = coverage$coverage
       )
-    })
+    }, coverages, names(coverages), USE.NAMES = FALSE)
 
   jsonlite::toJSON(na = "null", list("files" = res, "uploader" = jsonlite::unbox("R")))
 }
