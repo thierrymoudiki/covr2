@@ -15,6 +15,7 @@ trace_environment <- function(env) {
   the$replacements <- compact(c(
       replacements_S4(env),
       replacements_RC(env),
+      replacements_R6(env),
       lapply(ls(env, all.names = TRUE), replacement, env = env)))
 
   lapply(the$replacements, replace)
@@ -60,6 +61,47 @@ function_coverage <- function(fun, code = NULL, env = NULL, enc = parent.frame()
   replace(replacement)
   eval(code, enc)
   structure(as.list(.counters), class = "coverage")
+}
+
+#' Calculate test coverage for sets of files
+#'
+#' The files in \code{source_files} are first sourced in to a new environment
+#' to define functions to be checked. Then they are instrumented to track
+#' coverage and the files in the \code{test_files} are sourced.
+#' @param source_files Character vector of source files with function
+#'   definitions to measure coverage
+#' @param test_files Character vector of test files with code to test the
+#'   functions
+#' @param parent_env The parent environment to use when sourcing the files.
+#' @inheritParams package_coverage
+#' @export
+file_coverage <- function(
+  source_files,
+  test_files,
+  line_exclusions = NULL,
+  function_exclusions = NULL,
+  parent_env = parent.frame()) {
+
+  env <- new.env(parent = parent_env)
+
+  lapply(source_files,
+     sys.source, keep.source = TRUE, envir = env)
+
+  trace_environment(env)
+  on.exit({
+    reset_traces()
+    clear_counters()
+  })
+
+  lapply(test_files,
+     sys.source, keep.source = TRUE, envir = env)
+
+  coverage <- structure(as.list(.counters), class = "coverage")
+
+  exclude(coverage,
+    line_exclusions = line_exclusions,
+    function_exclusions = function_exclusions,
+    path = NULL)
 }
 
 #' Calculate test coverage for a package
@@ -136,13 +178,6 @@ package_coverage <- function(path = ".",
 
   flags <- getOption("covr.flags")
 
-  if (is_windows()) {
-
-    # workaround for https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16384
-    # LDFLAGS is ignored on Windows so we need to also override PKG_LIBS
-    flags[["PKG_LIBS"]] <- "--coverage"
-  }
-
   if (isTRUE(clean)) {
     on.exit({
       clean_objects(pkg$path)
@@ -154,17 +189,30 @@ package_coverage <- function(path = ".",
   clean_objects(pkg$path)
 
   # install the package in a temporary directory
-  withr::with_makevars(flags,
-    utils::install.packages(repos = NULL, lib = tmp_lib, pkg$path, type = "source", INSTALL_opts = c("--example", "--install-tests", "--with-keep.source", "--no-multiarch"), quiet = quiet))
+  withr::with_makevars(flags, assignment = "+=",
+    utils::install.packages(repos = NULL,
+                            lib = tmp_lib,
+                            pkg$path,
+                            type = "source",
+                            INSTALL_opts = c("--example",
+                                             "--install-tests",
+                                             "--with-keep.source",
+                                             "--no-multiarch"),
+                            quiet = quiet))
 
   # add hooks to the package startup
   add_hooks(pkg$package, tmp_lib)
 
-  withr::with_envvar(c(
-    SHLIB_LIBADD = "--coverage",
-      R_LIBS_USER = env_path(tmp_lib, Sys.getenv("R_LIBS_USER"))), {
-    withr::with_libpaths(tmp_lib, action = "prefix", {
-      withCallingHandlers({
+  libs <- env_path(tmp_lib, .libPaths())
+
+  withr::with_envvar(
+    c(R_DEFAULT_PACKAGES = "datasets,utils,grDevices,graphics,stats,methods",
+      R_LIBS = libs,
+      R_LIBS_USER = libs,
+      R_LIBS_SITE = libs), {
+
+
+    withCallingHandlers({
       if ("vignettes" %in% type) {
         type <- type[type != "vignettes"]
         run_vignettes(pkg, tmp_lib)
@@ -179,14 +227,14 @@ package_coverage <- function(path = ".",
         })
       }
       if ("tests" %in% type) {
-          tools::testInstalledPackage(pkg$package, outDir = tmp_lib, types = "tests", lib.loc = tmp_lib, ...)
+        tools::testInstalledPackage(pkg$package, outDir = tmp_lib, types = "tests", lib.loc = tmp_lib, ...)
       }
 
       run_commands(pkg, tmp_lib, code)
-      },
-      message = function(e) if (quiet) invokeRestart("muffleMessage") else e,
-      warning = function(e) if (quiet) invokeRestart("muffleWarning") else e)
-    })})
+    },
+    message = function(e) if (quiet) invokeRestart("muffleMessage") else e,
+    warning = function(e) if (quiet) invokeRestart("muffleWarning") else e)
+    })
 
   # read tracing files
   trace_files <- list.files(path = tmp_lib, pattern = "^covr_trace_[^/]+$", full.names = TRUE)
@@ -195,6 +243,9 @@ package_coverage <- function(path = ".",
     class = "coverage",
     package = pkg,
     relative = relative_path)
+
+  # Exclude both RcppExports to avoid reduntant coverage information
+  line_exclusions <- c("src/RcppExports.cpp", "R/RcppExports.R", line_exclusions)
 
   exclude(coverage,
     line_exclusions = line_exclusions,
@@ -213,6 +264,10 @@ merge_coverage <- function(...) {
 
   x <- objs[[1]]
   others <- objs[-1]
+
+  if (getRversion() < "3.2.0") {
+    lengths <- function(x, ...) vapply(x, length, integer(1L))
+  }
   stopifnot(all(lengths(others) == length(x)))
 
   for (y in others) {
@@ -257,6 +312,8 @@ run_vignettes <- function(pkg, lib) {
   res <- system(cmd)
   if (res != 0) {
     stop("Error running Vignettes:\n", paste(readLines(failfile), collapse = "\n"))
+  } else {
+    file.rename(failfile, outfile)
   }
 }
 
@@ -264,7 +321,7 @@ run_commands <- function(pkg, lib, commands) {
   outfile <- file.path(lib, paste0(pkg$package, "-commands.Rout"))
   failfile <- paste(outfile, "fail", sep = "." )
   cat(
-    "library('", pkg$package, "')",
+    "library('", pkg$package, "')\n",
     commands, "\n", file = outfile, sep = "")
   cmd <- paste(shQuote(file.path(R.home("bin"), "R")),
                "CMD BATCH --vanilla --no-timing",
@@ -272,6 +329,8 @@ run_commands <- function(pkg, lib, commands) {
   res <- system(cmd)
   if (res != 0) {
     stop("Error running commands:\n", paste(readLines(failfile), collapse = "\n"))
+  } else {
+    file.rename(failfile, outfile)
   }
 }
 

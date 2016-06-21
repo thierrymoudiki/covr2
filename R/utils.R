@@ -221,7 +221,7 @@ clean_objects <- function(path) {
   files <- list.files(file.path(path, "src"),
                       pattern = rex::rex(".",
                         or("o", "sl", "so", "dylib",
-                          "a", "dll", "def"), end),
+                          "a", "dll"), end),
                       full.names = TRUE, recursive = TRUE)
   unlink(files)
 
@@ -283,4 +283,8 @@ temp_dir <- function() {
 }
 temp_file <- function(pattern = "file", tmpdir = temp_dir(), fileext = "") {
   normalize_path(tempfile(pattern, tmpdir, fileext))
+}
+
+get_package_name <- function(x) {
+   attr(x, "package")$package %||% "coverage"
 }

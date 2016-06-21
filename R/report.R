@@ -1,24 +1,23 @@
-#' Display covr results using a shiny app
+#' Display covr results using a standalone report
 #'
-#' The shiny app is designed to provide local information to coverage
-#' information similar to the coveralls.io website.  However it does not and
-#' will not track coverage over time.
 #' @param x a coverage dataset
-#' @param ... additional arguments passed to methods
+#' @param file The report filename.
+#' @param browse whether to open a browser to veiew the report.
+#' @param ... Additional arguments passed to methods
+#' @aliases shine
 #' @examples
 #' \dontrun{
 #' x <- package_coverage()
-#' shine(x)
+#' report(x)
 #' }
 #' @export
-shine <- function(x, ...) UseMethod("shine")
-
-shine.default <- function(x, ...) {
-  stop("shine must be called on a coverage object!", call. = FALSE)
-}
+report <- function(x, ...) UseMethod("report")
 
 #' @export
-shine.coverages <- function(x, ...) {
+shine <- report
+
+#' @export
+report.coverages <- function(x, ...) {
 
   loadNamespace("shiny")
 
@@ -45,7 +44,8 @@ shine.coverages <- function(x, ...) {
       options = list(searching = FALSE, dom = "t", paging = FALSE),
       rownames = FALSE,
       callback = DT::JS("table.on('click.dt', 'a', function() {
-        Shiny.onInputChange('filename', $(this).text());
+        id = $(this).text().replace(/(:|\\.|\\[|\\]|,)/g, '\\\\$1');
+        $('div#' + id).show();
         $('ul.nav a[data-value=Source]').tab('show');
       });"))
     shiny::observe({
@@ -61,8 +61,11 @@ shine.coverages <- function(x, ...) {
   )
 }
 
+#' @rdname report
 #' @export
-shine.coverage <- function(x, ...) {
+report.coverage <- function(x,
+  file = file.path(tempdir(), paste0(get_package_name(x), "-report.html")),
+  browse = interactive(), ...) {
 
   loadNamespace("shiny")
 
@@ -72,33 +75,31 @@ shine.coverage <- function(x, ...) {
     shiny::includeCSS(system.file("www/shiny.css", package = "covr")),
     shiny::column(8, offset = 2,
       shiny::tabsetPanel(
-        shiny::tabPanel("Files", DT::dataTableOutput(outputId = "file_table")),
-        shiny::tabPanel("Source", addHighlight(shiny::tableOutput("source_table")))
-        )
-      ),
+        shiny::tabPanel("Files",
+          DT::datatable(data$file_stats,
+            escape = FALSE,
+            options = list(searching = FALSE, dom = "t", paging = FALSE),
+            rownames = FALSE,
+            callback = DT::JS(
+"table.on('click.dt', 'a', function() {
+  files = $('div#files div');
+  files.not('div.hidden').addClass('hidden');
+  id = $(this).text();
+  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');
+  $('ul.nav a[data-value=Source]').tab('show');
+});"))),
+            shiny::tabPanel("Source", addHighlight(renderSourceTable(data$full)))
+            )
+          ),
     title = paste(attr(x, "package")$package, "Coverage"))
 
-  server <- function(input, output, session) {
-    output$file_table <- DT::renderDataTable(
-      data$file_stats,
-      escape = FALSE,
-      options = list(searching = FALSE, dom = "t", paging = FALSE),
-      rownames = FALSE,
-      callback = DT::JS("table.on('click.dt', 'a', function() {
-        Shiny.onInputChange('filename', $(this).text());
-        $('ul.nav a[data-value=Source]').tab('show');
-      });"))
-    shiny::observe({
-      if (!is.null(input$filename)) {
-        output$source_table <- renderSourceTable(data$full[[input$filename]])
-      }
-    })
+  con <- file(description = file, open = "w")
+  renderPage(ui, con)
+  close(con)
+  if (browse) {
+    utils::browseURL(file)
   }
-
-  shiny::runApp(list(ui = ui, server = server),
-    launch.browser = getOption("viewer", utils::browseURL),
-    quiet = TRUE
-  )
+  invisible()
 }
 
 to_shiny_data <- function(x) {
@@ -177,55 +178,86 @@ add_color_box <- function(nums) {
   })
 }
 
-utils::globalVariables("func", "covr")
+renderSourceTable <- function(data) {
 
-renderSourceTable <- function(expr, env = parent.frame()) {
-
-  shiny::installExprFunction(expr, "func", env)
-
-  shiny::markRenderFunction(shiny::tableOutput,
-    function() {
-      data <- func() # nolint
-
-      if (is.null(data) || identical(data, data.frame())) {
-        return("")
-      }
-
-      table <- as.character(shiny::tags$table(class = "table-condensed",
+  shiny::tags$div(id = "files",
+    Map(function(lines, file) {
+      shiny::tags$div(id = file, class="hidden",
+        shiny::tags$table(class = "table-condensed",
           shiny::tags$tbody(
-            lapply(seq_len(NROW(data)),
+            lapply(seq_len(NROW(lines)),
               function(row_num) {
-                coverage <- data[row_num, "coverage"]
+                coverage <- lines[row_num, "coverage"]
 
                 cov_type <- NULL
                 if (coverage == 0) {
                   cov_value <- "!"
                   cov_type <- "missed"
                 } else if (coverage > 0) {
-                  cov_value <- shiny::HTML(paste0(data[row_num, "coverage"], "<em>x</em>", collapse = ""))
+                  cov_value <- shiny::HTML(paste0(lines[row_num, "coverage"], "<em>x</em>", collapse = ""))
                   cov_type <- "covered"
                 } else {
                   cov_type <- "never"
                   cov_value <- ""
                 }
                 shiny::tags$tr(class = cov_type,
-                  shiny::tags$td(class = "num", data[row_num, "line"]),
-                  shiny::tags$td(class = "col-sm-12", shiny::pre(class = "language-r", data[row_num, "source"])),
+                  shiny::tags$td(class = "num", lines[row_num, "line"]),
+                  shiny::tags$td(class = "col-sm-12", shiny::pre(class = "language-r", lines[row_num, "source"])),
                   shiny::tags$td(class = "coverage", cov_value)
                   )
               })
             )
-          )
-        )
-
-      paste(sep = "\n", table, "<script>
-        $('#source_table pre').each(function(i, block) {
-          hljs.highlightBlock(block);
-          });
-        </script>")
-    })
+          ))
+    }, lines = data, file = names(data)),
+  shiny::tags$script(
+    "$('div#files pre').each(function(i, block) {
+    hljs.highlightBlock(block);
+});"))
 }
 
+renderPage <- function(ui, connection) {
+
+  result <- htmltools::renderTags(ui)
+
+  deps <- c(
+    list(
+      htmltools::htmlDependency("json2", "2014.02.04", system.file(package = "shiny", "www", "shared"), script = "json2-min.js"),
+      htmltools::htmlDependency("jquery", "1.11.0", system.file(package = "shiny", "www", "shared"), script = "jquery.min.js")#
+    ),
+    result$dependencies
+  )
+  deps <- htmltools::resolveDependencies(deps)
+  #deps <- lapply(deps, createWebDependency)
+  depStr <- paste(sapply(deps, function(dep) {
+    sprintf("%s[%s]", dep$name, dep$version)
+  }), collapse = ";")
+  depHtml <- htmltools::renderDependencies(deps, "file")
+
+  # write preamble
+  writeLines(c('<!DOCTYPE html>',
+               '<html>',
+               '<head>',
+               '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
+               sprintf('  <script type="application/shiny-singletons">%s</script>',
+                       paste(result$singletons, collapse = ',')
+               ),
+               sprintf('  <script type="application/html-dependencies">%s</script>',
+                       depStr
+               ),
+               depHtml
+              ),
+              con = connection)
+  writeLines(c(result$head,
+               '</head>',
+               recursive=TRUE),
+             con = connection)
+
+  writeLines(result$html, con = connection)
+
+  # write end document
+  writeLines('</html>',
+             con = connection)
+}
 addHighlight <- function(x = list()) {
   highlight <- htmltools::htmlDependency("highlight.js", "6.2",
                                          system.file(package = "shiny",
