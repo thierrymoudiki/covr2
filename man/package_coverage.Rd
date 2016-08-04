@@ -12,9 +12,9 @@ package_coverage(path = ".", type = c("tests", "vignettes", "examples",
 \arguments{
 \item{path}{file path to the package}
 
-\item{type}{run the package \sQuote{test}, \sQuote{vignette},
-\sQuote{example}, \sQuote{all}, or \sQuote{none}. The default is
-\sQuote{test}.}
+\item{type}{run the package \sQuote{tests}, \sQuote{vignettes},
+\sQuote{examples}, \sQuote{all}, or \sQuote{none}. The default is
+\sQuote{tests}.}
 
 \item{combine_types}{If \code{TRUE} (the default) the coverage for all types
 is simply summed into one coverage object. If \code{FALSE} separate objects
@@ -23,9 +23,11 @@ are used for each type of coverage.}
 \item{relative_path}{whether to output the paths as relative or absolute
 paths.}
 
-\item{quiet}{whether to load and compile the package quietly}
+\item{quiet}{whether to load and compile the package quietly, useful for
+debugging errors.}
 
-\item{clean}{whether to clean temporary output files after running.}
+\item{clean}{whether to clean temporary output files after running, mainly
+useful for debugging errors.}
 
 \item{line_exclusions}{a named list of files with the lines to exclude from
 each file.}
@@ -33,16 +35,33 @@ each file.}
 \item{function_exclusions}{a vector of regular expressions matching function
 names to exclude. Example \code{print\\.} to match print methods.}
 
-\item{code}{Additional test code to run.}
+\item{code}{A character vector of additional test code to run.}
 
 \item{...}{Additional arguments passed to \code{\link[tools]{testInstalledPackage}}}
 
 \item{exclusions}{\sQuote{Deprecated}, please use \sQuote{line_exclusions} instead.}
 }
 \description{
-Calculate test coverage for a package
+This function calculates the test coverage for a development package on the
+\code{path}. By default it runs only the package tests, but it can also run
+vignette and example code.
+}
+\details{
+This function uses \code{\link[tools]{testInstalledPackage}} to run the
+code, if you would like to test your package in another way you can set
+\code{type = "none"} and pass the code to run as a character vector to the
+\code{code} parameter.
+
+#ifdef unix
+Parallelized code using \code{\link{mcparallel}}
+needs to be use a patched \code{mcparallel:::mcexit}. This is done
+automatically if the package depends on parallel, but can also be explicitly
+set using the environment variable \code{COVR_FIX_PARALLEL_MCEXIT} or the
+global option \code{covr.fix_parallel_mcexit}.
+#endif
 }
 \seealso{
-exclusions
+\code{\link{exclusions}} For details on excluding parts of the
+package from the coverage calculations.
 }
 

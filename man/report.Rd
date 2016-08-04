@@ -8,6 +8,8 @@
 \usage{
 report(x, ...)
 
+shine(x, ...)
+
 \method{report}{coverage}(x, file = file.path(tempdir(),
   paste0(get_package_name(x), "-report.html")), browse = interactive(), ...)
 }
@@ -18,7 +20,7 @@ report(x, ...)
 
 \item{file}{The report filename.}
 
-\item{browse}{whether to open a browser to veiew the report.}
+\item{browse}{whether to open a browser to view the report.}
 }
 \description{
 Display covr results using a standalone report

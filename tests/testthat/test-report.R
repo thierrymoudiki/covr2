@@ -5,9 +5,10 @@ test_that("it works with coverage objects", {
   tmp <- tempfile()
   set.seed(42)
   # Shiny uses its own seed which is not affected by set.seed, so we need to
-  # set that as well to have reproducability
+  # set that as well to have reproducibility
   g <- shiny:::.globals
   g$ownSeed <- .Random.seed
+  htmlwidgets::setWidgetIdSeed(42)
   report(cov$tests, file = tmp, browse = FALSE)
   simplify_link <- function(x) {
     rex::re_substitutes(x,

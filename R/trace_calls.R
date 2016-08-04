@@ -7,7 +7,16 @@
 #' @seealso \url{http://adv-r.had.co.nz/Expressions.html}
 #' @return a modified expression with count calls inserted before each previous
 #' call.
+#' @keywords internal
 trace_calls <- function (x, parent_functions = NULL, parent_ref = NULL) {
+
+  # Construct the calls by hand to avoid a NOTE from R CMD check
+  count <- function(key, val) {
+    call("{",
+      as.call(list(call(":::", as.symbol("covr"), as.symbol("count")), key)),
+      val)
+  }
+
   if (is.null(parent_functions)) {
     parent_functions <- deparse(substitute(x))
   }
@@ -24,7 +33,7 @@ trace_calls <- function (x, parent_functions = NULL, parent_ref = NULL) {
         x
       } else {
         key <- new_counter(parent_ref, parent_functions) # nolint
-        bquote(`{`(covr:::count(.(key)), .(x)))
+        count(key, x)
       }
     }
   }
@@ -38,7 +47,7 @@ trace_calls <- function (x, parent_functions = NULL, parent_ref = NULL) {
       as.call(Map(trace_calls, x, src_ref, MoreArgs = list(parent_functions = parent_functions)))
     } else if (!is.null(parent_ref)) {
       key <- new_counter(parent_ref, parent_functions)
-      bquote(`{`(covr:::count(.(key)), .(as.call(recurse(x)))))
+      count(key, as.call(recurse(x)))
     } else {
       as.call(recurse(x))
     }
@@ -50,7 +59,7 @@ trace_calls <- function (x, parent_functions = NULL, parent_ref = NULL) {
        (is.symbol(fun_body) || !identical(fun_body[[1]], as.name("{")))) {
       src_ref <- attr(x, "srcref")
       key <- new_counter(src_ref, parent_functions)
-      fun_body <- bquote(`{`(covr:::count(.(key)), .(trace_calls(fun_body, parent_functions))))
+      fun_body <- count(key, trace_calls(fun_body, parent_functions))
     } else {
       fun_body <- trace_calls(fun_body, parent_functions)
     }
@@ -83,6 +92,7 @@ trace_calls <- function (x, parent_functions = NULL, parent_ref = NULL) {
 #'
 #' @param src_ref a \code{\link[base]{srcref}}
 #' @param parent_functions the functions that this srcref is contained in.
+#' @keywords internal
 new_counter <- function(src_ref, parent_functions) {
   key <- key(src_ref)
   .counters[[key]]$value <- 0
@@ -94,12 +104,14 @@ new_counter <- function(src_ref, parent_functions) {
 #' increment a given counter
 #'
 #' @param key generated with \code{\link{key}}
+#' @keywords internal
 count <- function(key) {
   .counters[[key]]$value <- .counters[[key]]$value + 1
 }
 
 #' clear all previous counters
 #'
+#' @keywords internal
 clear_counters <- function() {
   rm(envir = .counters, list = ls(envir = .counters))
 }
@@ -107,6 +119,7 @@ clear_counters <- function() {
 #' Generate a key for a  call
 #'
 #' @param x the srcref of the call to create a key for
+#' @keywords internal
 key <- function(x) {
   paste(collapse = ":", c(utils::getSrcFilename(x), x))
 }

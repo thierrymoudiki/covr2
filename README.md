@@ -9,7 +9,7 @@ Track test coverage for your R package and (optionally) upload the results to
 
 # Installation #
 ## Codecov ##
-If you are already using [Travis-CI](https://travis-ci.org) or [Appveyor CI](http://www.appveyor.com) add the
+If you are already using [Travis-CI](https://travis-ci.org) or [Appveyor CI](http://ci.appveyor.com) add the
 following to your project's `.travis.yml` to track your coverage results
 over time with [Codecov](https://codecov.io).
 
@@ -32,8 +32,7 @@ without needing `CODECOV_TOKEN`).
 - [Codeship](https://www.codeship.io/)
 - [Circleci\*](https://circleci.com)
 - [Semaphore](https://semaphoreapp.com)
-- [drone.io](https://drone.io)
-- [AppVeyor\*](http://www.appveyor.com)
+- [AppVeyor\*](http://ci.appveyor.com)
 - [Wercker](http://wercker.com)
 - [GitLab-CI](https://about.gitlab.com/gitlab-ci/)
 
@@ -56,7 +55,7 @@ For CI systems not supported by coveralls you need to set the `COVERALLS_TOKEN`
 environment variable. It is wise to use a [Secure Variable](http://docs.travis-ci.com/user/environment-variables/#Secure-Variables)
 so that it is not revealed publicly.
 
-Also you will need to turn on coveralls for your project at <https://coveralls.io/repos/new>.
+Also you will need to turn on coveralls for your project at <https://coveralls.io/repos>.
 
 # Interactive Usage #
 
@@ -173,7 +172,7 @@ to each call.
 
 The vignette
 [vignettes/how_it_works.Rmd](https://github.com/jimhester/covr/blob/master/vignettes/how_it_works.Rmd)
-contains a detailed explanation of the technique and the rational behind it.
+contains a detailed explanation of the technique and the rationale behind it.
 
 You can view the vignette from within `R` using
 

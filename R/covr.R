@@ -30,7 +30,7 @@ save_trace <- function(directory) {
   saveRDS(.counters, file = tmp_file)
 }
 
-#' Calculate test coverage for specific function.
+#' Calculate test coverage for a specific function.
 #'
 #' @param fun name of the function.
 #' @param env environment the function is defined in.
@@ -65,9 +65,9 @@ function_coverage <- function(fun, code = NULL, env = NULL, enc = parent.frame()
 
 #' Calculate test coverage for sets of files
 #'
-#' The files in \code{source_files} are first sourced in to a new environment
+#' The files in \code{source_files} are first sourced into a new environment
 #' to define functions to be checked. Then they are instrumented to track
-#' coverage and the files in the \code{test_files} are sourced.
+#' coverage and the files in \code{test_files} are sourced.
 #' @param source_files Character vector of source files with function
 #'   definitions to measure coverage
 #' @param test_files Character vector of test files with code to test the
@@ -106,25 +106,46 @@ file_coverage <- function(
 
 #' Calculate test coverage for a package
 #'
+#' This function calculates the test coverage for a development package on the
+#' \code{path}. By default it runs only the package tests, but it can also run
+#' vignette and example code.
+#'
+#' @details
+#' This function uses \code{\link[tools]{testInstalledPackage}} to run the
+#' code, if you would like to test your package in another way you can set
+#' \code{type = "none"} and pass the code to run as a character vector to the
+#' \code{code} parameter.
+#'
+#' #ifdef unix
+#' Parallelized code using \code{\link{mcparallel}}
+#' needs to be use a patched \code{mcparallel:::mcexit}. This is done
+#' automatically if the package depends on parallel, but can also be explicitly
+#' set using the environment variable \code{COVR_FIX_PARALLEL_MCEXIT} or the
+#' global option \code{covr.fix_parallel_mcexit}.
+#' #endif
+#'
 #' @param path file path to the package
-#' @param type run the package \sQuote{test}, \sQuote{vignette},
-#' \sQuote{example}, \sQuote{all}, or \sQuote{none}. The default is
-#' \sQuote{test}.
+#' @param type run the package \sQuote{tests}, \sQuote{vignettes},
+#' \sQuote{examples}, \sQuote{all}, or \sQuote{none}. The default is
+#' \sQuote{tests}.
 #' @param combine_types If \code{TRUE} (the default) the coverage for all types
 #' is simply summed into one coverage object. If \code{FALSE} separate objects
 #' are used for each type of coverage.
 #' @param relative_path whether to output the paths as relative or absolute
 #' paths.
-#' @param quiet whether to load and compile the package quietly
-#' @param clean whether to clean temporary output files after running.
+#' @param quiet whether to load and compile the package quietly, useful for
+#' debugging errors.
+#' @param clean whether to clean temporary output files after running, mainly
+#' useful for debugging errors.
 #' @param line_exclusions a named list of files with the lines to exclude from
 #' each file.
 #' @param function_exclusions a vector of regular expressions matching function
 #' names to exclude. Example \code{print\\.} to match print methods.
-#' @param code Additional test code to run.
+#' @param code A character vector of additional test code to run.
 #' @param ... Additional arguments passed to \code{\link[tools]{testInstalledPackage}}
 #' @param exclusions \sQuote{Deprecated}, please use \sQuote{line_exclusions} instead.
-#' @seealso exclusions
+#' @seealso \code{\link{exclusions}} For details on excluding parts of the
+#' package from the coverage calculations.
 #' @export
 package_coverage <- function(path = ".",
                              type = c("tests", "vignettes", "examples", "all", "none"),
@@ -171,8 +192,6 @@ package_coverage <- function(path = ".",
     return(res)
   }
 
-  on.exit(clear_counters())
-
   tmp_lib <- temp_file("R_LIBS")
   dir.create(tmp_lib)
 
@@ -201,7 +220,8 @@ package_coverage <- function(path = ".",
                             quiet = quiet))
 
   # add hooks to the package startup
-  add_hooks(pkg$package, tmp_lib)
+  add_hooks(pkg$package, tmp_lib,
+    fix_mcexit = should_enable_parallel_mcexit_fix(pkg))
 
   libs <- env_path(tmp_lib, .libPaths())
 
@@ -345,12 +365,18 @@ run_commands <- function(pkg, lib, commands) {
 # regardless of how the process terminates.
 # @param pkg_name name of the package to add hooks to
 # @param lib the library path to look in
-add_hooks <- function(pkg_name, lib) {
+# @param fix_mcexit whether to add the fix for mcparallel:::mcexit
+add_hooks <- function(pkg_name, lib, fix_mcexit = FALSE) {
   load_script <- file.path(lib, pkg_name, "R", pkg_name)
   lines <- readLines(file.path(lib, pkg_name, "R", pkg_name))
   lines <- append(lines,
     c("setHook(packageEvent(pkg, \"onLoad\"), function(...) covr:::trace_environment(ns))",
       paste0("reg.finalizer(ns, function(...) { covr:::save_trace(\"", lib, "\") }, onexit = TRUE)")),
     length(lines) - 1L)
+
+  if (fix_mcexit) {
+    lines <- append(lines, sprintf("covr:::fix_mcexit('%s')", lib))
+  }
+
   writeLines(text = lines, con = load_script)
 }

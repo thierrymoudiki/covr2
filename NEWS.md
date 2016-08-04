@@ -1,3 +1,10 @@
+## 2.2.0 ##
+* Fix tests broken with updated htmlwidgets
+* Change report tab title based on filename (Chen Liang).
+* Add support for cobertura XML output (@wligtenberg).
+* Add mcparallel support by patching `mcparallel:::mcexit()`
+  automatically for packages using parallel (#195, @kforner).
+
 ## 2.1.0 ##
 * Add support for GitLab CI (#190, @enbrown).
 * Update exclusion documentation to include line_exclusions and function
@@ -13,7 +20,7 @@
 * Now tracks coverage for RC methods
 * Rewrote loading and saving to support parallel code and tests including
   `quit()` calls.
-* Made passing code to function_coverage() and package_coverage() _not_ use
+* Made passing code to `function_coverage()` and `package_coverage()` _not_ use
   non-standard evaluation.
 * `NULL` statements are analyzed for coverage (#156, @krlmlr).
 * Finer coverage analysis for brace-less `if`, `while` and `for` statements (#154, @krlmlr).

@@ -2,7 +2,7 @@
 #'
 #' @param x a coverage dataset
 #' @param file The report filename.
-#' @param browse whether to open a browser to veiew the report.
+#' @param browse whether to open a browser to view the report.
 #' @param ... Additional arguments passed to methods
 #' @aliases shine
 #' @examples
@@ -14,6 +14,7 @@
 report <- function(x, ...) UseMethod("report")
 
 #' @export
+#' @rdname report
 shine <- report
 
 #' @export
@@ -86,20 +87,19 @@ report.coverage <- function(x,
   files.not('div.hidden').addClass('hidden');
   id = $(this).text();
   files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');
-  $('ul.nav a[data-value=Source]').tab('show');
+  $('ul.nav a[data-value=Source]').text(id).tab('show');
 });"))),
             shiny::tabPanel("Source", addHighlight(renderSourceTable(data$full)))
             )
           ),
     title = paste(attr(x, "package")$package, "Coverage"))
 
-  con <- file(description = file, open = "w")
-  renderPage(ui, con)
-  close(con)
+  htmltools::save_html(ui, file)
+  viewer <- getOption("viewer", utils::browseURL)
   if (browse) {
-    utils::browseURL(file)
+      viewer(file)
   }
-  invisible()
+  invisible(file)
 }
 
 to_shiny_data <- function(x) {
@@ -215,49 +215,6 @@ renderSourceTable <- function(data) {
 });"))
 }
 
-renderPage <- function(ui, connection) {
-
-  result <- htmltools::renderTags(ui)
-
-  deps <- c(
-    list(
-      htmltools::htmlDependency("json2", "2014.02.04", system.file(package = "shiny", "www", "shared"), script = "json2-min.js"),
-      htmltools::htmlDependency("jquery", "1.11.0", system.file(package = "shiny", "www", "shared"), script = "jquery.min.js")#
-    ),
-    result$dependencies
-  )
-  deps <- htmltools::resolveDependencies(deps)
-  #deps <- lapply(deps, createWebDependency)
-  depStr <- paste(sapply(deps, function(dep) {
-    sprintf("%s[%s]", dep$name, dep$version)
-  }), collapse = ";")
-  depHtml <- htmltools::renderDependencies(deps, "file")
-
-  # write preamble
-  writeLines(c('<!DOCTYPE html>',
-               '<html>',
-               '<head>',
-               '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
-               sprintf('  <script type="application/shiny-singletons">%s</script>',
-                       paste(result$singletons, collapse = ',')
-               ),
-               sprintf('  <script type="application/html-dependencies">%s</script>',
-                       depStr
-               ),
-               depHtml
-              ),
-              con = connection)
-  writeLines(c(result$head,
-               '</head>',
-               recursive=TRUE),
-             con = connection)
-
-  writeLines(result$html, con = connection)
-
-  # write end document
-  writeLines('</html>',
-             con = connection)
-}
 addHighlight <- function(x = list()) {
   highlight <- htmltools::htmlDependency("highlight.js", "6.2",
                                          system.file(package = "shiny",
