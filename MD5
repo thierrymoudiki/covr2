@@ -1,7 +1,7 @@
-92563c2aee827d18e751353d8319fb6a *DESCRIPTION
+d2d76ca5f4ed116b421741d42eb384e9 *DESCRIPTION
 bc3a849060d69db9eb35174f4bc8bcef *LICENSE
-8a92b24edbf674912162e3b7bee130ad *NAMESPACE
-99fce79409fdb2fb45a8126d278b4415 *NEWS.md
+4104ac5b6bb9fea0eddfb023b21a0c90 *NAMESPACE
+5d51f9c4f438d30846d270ae07ec501a *NEWS.md
 5abeeb82c27bb4cd48a8a801cf22b4b3 *R/R6.R
 57cb8a57506a10283cd5e72b88c8f2aa *R/RC.R
 fe4d1ae94f794f9d779a12727e615545 *R/S4.R
@@ -20,7 +20,7 @@ a22046c7c8875ec9c61618c839508146 *R/parse_data.R
 f55a9e1241dd608ec134a09509cbd54e *R/summary_functions.R
 ffdcdac40a40345bd682423e7892fe13 *R/system.R
 a7425166c7af319f01494272062edc3c *R/trace_calls.R
-864d687ad2d8ba041ce18b6fd5c4da06 *R/utils.R
+fe2993df25f25611117518f03fa4e29f *R/utils.R
 ffcd24299bc93c2db4513305c093f435 *R/value.R
 e235523e816865b19f3e2fdeb7583e0d *R/vectorized.R
 ee27fd46d68a8481daf273e2e82ebe0c *R/zzz.R
@@ -140,8 +140,8 @@ a8a6ce47344ea26e717c174b2d00096b *tests/testthat/test-null.R
 5a10bb9b8064f494bd162a35f30ee2a8 *tests/testthat/test-package_coverage.R
 4b5a42524e3942be27e4a6839c873309 *tests/testthat/test-parallel.R
 d933b91b609d999bd004269371a5c87f *tests/testthat/test-print.R
-3fa3674c5a4507bd92efb9399a00d117 *tests/testthat/test-report.R
-2c244bba3ce73e5f8e348981470676c0 *tests/testthat/test-report.htm
+6a5906ecf7b5f250726e3f6aff294fdc *tests/testthat/test-report.R
+411d3b399da4a67476ae59e4eb4be1e2 *tests/testthat/test-report.htm
 ff9b51d3a0bdec4402ad0da3428d7700 *tests/testthat/test-summary.R
 64bd06337acf87a0a8c30299e1bc8460 *tests/testthat/test-trace_calls.R
 bd0a242c29656c8bda693b13674e3b5e *tests/testthat/test-utils.R

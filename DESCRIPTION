@@ -1,6 +1,6 @@
 Package: covr
 Title: Test Coverage for Packages
-Version: 2.2.0
+Version: 2.2.1
 Authors@R: c(person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre")),
     person("Willem", "Ligtenberg", email = "willem.ligtenberg@openanalytics.eu", role = "ctb"))
 Description: Track and report code coverage for your package and (optionally)
@@ -16,16 +16,16 @@ Depends: R (>= 3.1.0), methods
 Imports: stats, utils, jsonlite, rex, httr, crayon, withr (>= 1.0.2),
         memoise
 Suggests: R6, knitr, rmarkdown, shiny (>= 0.11.1), htmltools,
-        htmlwidgets (>= 0.7), DT, testthat, rstudioapi (>= 0.2),
-        devtools, xml2 (>= 1.0.0), parallel
+        htmlwidgets (>= 0.7), DT (>= 0.2), testthat, rstudioapi (>=
+        0.2), devtools, xml2 (>= 1.0.0), parallel
 License: MIT + file LICENSE
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
 NeedsCompilation: yes
-Packaged: 2016-08-03 20:30:39 UTC; jhester
+Packaged: 2016-08-10 17:31:44 UTC; jhester
 Author: Jim Hester [aut, cre],
   Willem Ligtenberg [ctb]
 Maintainer: Jim Hester <james.f.hester@gmail.com>
 Repository: CRAN
-Date/Publication: 2016-08-04 00:57:35
+Date/Publication: 2016-08-10 21:34:56
