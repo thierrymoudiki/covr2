@@ -1,6 +1,6 @@
 #' @import methods
 #' @importFrom stats aggregate na.omit na.pass setNames
-#' @importFrom utils capture.output getSrcFilename relist str
+#' @importFrom utils capture.output getSrcFilename relist str head
 NULL
 
 rex::register_shortcuts("covr")
@@ -33,8 +33,8 @@ save_trace <- function(directory) {
 #' Calculate test coverage for a specific function.
 #'
 #' @param fun name of the function.
-#' @param env environment the function is defined in.
 #' @param code expressions to run.
+#' @param env environment the function is defined in.
 #' @param enc the enclosing environment which to run the expressions.
 #' @export
 function_coverage <- function(fun, code = NULL, env = NULL, enc = parent.frame()) {
@@ -102,6 +102,31 @@ file_coverage <- function(
     line_exclusions = line_exclusions,
     function_exclusions = function_exclusions,
     path = NULL)
+}
+
+#' Calculate coverage of code directly
+#'
+#' This function is useful for testing, and is a thin wrapper around
+#' \code{\link{file_coverage}} because parseData is not populated properly
+#' unless the functions are defined in a file.
+#' @param source_code A character vector of source code
+#' @param test_code A character vector of test code
+#' @inheritParams file_coverage
+#' @param ... Additional arguments passed to \code{\link{file_coverage}}
+#' @export
+code_coverage <- function(
+   source_code,
+   test_code,
+   line_exclusions = NULL,
+   function_exclusions = NULL,
+   ...) {
+  src <- tempfile("source.R")
+  test <- tempfile("test.R")
+  on.exit(file.remove(src, test))
+  cat(source_code, file = src)
+  cat(test_code, file = test)
+  file_coverage(src, test, line_exclusions = line_exclusions,
+    function_exclusions = function_exclusions, ...)
 }
 
 #' Calculate test coverage for a package
@@ -238,18 +263,27 @@ package_coverage <- function(path = ".",
         run_vignettes(pkg, tmp_lib)
       }
 
+      out_dir <- file.path(tmp_lib, pkg$package)
       if ("examples" %in% type) {
         type <- type[type != "examples"]
         # testInstalledPackage explicitly sets R_LIBS="" on windows, and does
         # not restore it after, so we need to reset it ourselves.
         withr::with_envvar(c(R_LIBS = Sys.getenv("R_LIBS")), {
-          tools::testInstalledPackage(pkg$package, outDir = tmp_lib, types = "examples", lib.loc = tmp_lib, ...)
+          result <- tools::testInstalledPackage(pkg$package, outDir = out_dir, types = "examples", lib.loc = tmp_lib, ...)
+          if (result != 0L) {
+            show_failures(out_dir)
+          }
         })
       }
       if ("tests" %in% type) {
-        tools::testInstalledPackage(pkg$package, outDir = tmp_lib, types = "tests", lib.loc = tmp_lib, ...)
+        result <- tools::testInstalledPackage(pkg$package, outDir = out_dir, types = "tests", lib.loc = tmp_lib, ...)
+        if (result != 0L) {
+          show_failures(out_dir)
+        }
       }
 
+      # We always run the commands file (even if empty) to load the package and
+      # initialize all the counters to 0.
       run_commands(pkg, tmp_lib, code)
     },
     message = function(e) if (quiet) invokeRestart("muffleMessage") else e,
@@ -264,6 +298,8 @@ package_coverage <- function(path = ".",
     package = pkg,
     relative = relative_path)
 
+  coverage <- filter_non_package_files(coverage)
+
   # Exclude both RcppExports to avoid reduntant coverage information
   line_exclusions <- c("src/RcppExports.cpp", "R/RcppExports.R", line_exclusions)
 
@@ -271,6 +307,16 @@ package_coverage <- function(path = ".",
     line_exclusions = line_exclusions,
     function_exclusions = function_exclusions,
     path = if (isTRUE(relative_path)) pkg$path else NULL)
+}
+
+show_failures <- function(dir) {
+  fail_files <- list.files(dir, pattern = "fail$", recursive = TRUE, full.names = TRUE)
+  for (file in fail_files) {
+    lines <- readLines(file)
+    # Skip header lines (until first >)
+    lines <- lines[seq(head(which(grepl("^>", lines)), n = 1), length(lines))]
+    stop("Failure in `", file, "`\n", paste(lines, collapse = "\n"), call. = FALSE)
+  }
 }
 
 # merge multiple coverage outputs together Assumes the order of coverage lines
@@ -282,12 +328,17 @@ merge_coverage <- function(...) {
     return()
   }
 
-  x <- objs[[1]]
-  others <- objs[-1]
-
   if (getRversion() < "3.2.0") {
     lengths <- function(x, ...) vapply(x, length, integer(1L))
   }
+
+  ## FIXME: https://github.com/jimhester/covr/issues/177
+  ns <- lengths(objs)
+  objs <- objs[ns != 2]
+  
+  x <- objs[[1]]
+  others <- objs[-1]
+
   stopifnot(all(lengths(others) == length(x)))
 
   for (y in others) {
@@ -331,7 +382,7 @@ run_vignettes <- function(pkg, lib) {
                shQuote(outfile), shQuote(failfile))
   res <- system(cmd)
   if (res != 0) {
-    stop("Error running Vignettes:\n", paste(readLines(failfile), collapse = "\n"))
+    show_failures(dirname(failfile))
   } else {
     file.rename(failfile, outfile)
   }
@@ -347,8 +398,8 @@ run_commands <- function(pkg, lib, commands) {
                "CMD BATCH --vanilla --no-timing",
                shQuote(outfile), shQuote(failfile))
   res <- system(cmd)
-  if (res != 0) {
-    stop("Error running commands:\n", paste(readLines(failfile), collapse = "\n"))
+  if (res != 0L) {
+    show_failures(dirname(failfile))
   } else {
     file.rename(failfile, outfile)
   }

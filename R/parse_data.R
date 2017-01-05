@@ -17,6 +17,9 @@ impute_srcref <- function(x, parent_ref) {
   pd_child <- pd[pd$parent == expr_id, ]
   pd_child <- pd_child[order(pd_child$line1, pd_child$col1), ]
 
+  # exclude comments
+  pd_child <- pd_child[pd_child$token != "COMMENT", ]
+
   line_offset <- parent_ref[[7L]] - parent_ref[[1L]]
 
   make_srcref <- function(from, to = from) {
@@ -38,9 +41,9 @@ impute_srcref <- function(x, parent_ref) {
     "if" = {
       src_ref <- list(
         NULL,
-        make_srcref(2, 4),
+        make_srcref(3),
         make_srcref(5),
-        make_srcref(6, 7)
+        make_srcref(7)
       )
       # the fourth component isn't used for an "if" without "else"
       src_ref[seq_along(x)]
