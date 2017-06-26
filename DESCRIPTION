@@ -1,10 +1,10 @@
 Encoding: UTF-8
 Package: covr
 Title: Test Coverage for Packages
-Version: 2.2.2
+Version: 3.0.0
 Authors@R: c(
     person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre")),
-    person("Willem", "Ligtenberg", email = "willem.ligtenberg@openanalytics.eu", role = "ctb"),
+    person("Willem", "Ligtenberg", role = "ctb"),
     person("Kirill", "Müller", role = "ctb"),
     person("Henrik", "Bengtsson", role = "ctb"),
     person("Steve", "Peak", role = "ctb"),
@@ -22,10 +22,12 @@ Authors@R: c(
     person("Kun", "Ren", role = "ctb"),
     person("Jeroen", "Ooms", role = "ctb"),
     person("Ken", "Williams", role = "ctb"),
-    person("Chris", "Campbell", role = "ctb"))
+    person("Chris", "Campbell", role = "ctb"),
+    person("David", "Hugh-Jones", role = "ctb"),
+    person("Qin", "Wang", role = "ctb"))
 Description: Track and report code coverage for your package and (optionally)
-    upload the results to a coverage service like 'Codecov' (http://codecov.io) or
-    'Coveralls' (http://coveralls.io). Code coverage is a measure of the amount of
+    upload the results to a coverage service like 'Codecov' <http://codecov.io> or
+    'Coveralls' <http://coveralls.io>. Code coverage is a measure of the amount of
     code being exercised by a set of tests. It is an indirect measure of test
     quality and completeness. This package is compatible with any testing
     methodology or framework and tracks coverage of both R code and compiled
@@ -37,12 +39,12 @@ Imports: stats, utils, jsonlite, rex, httr, crayon, withr (>= 1.0.2)
 Suggests: R6, knitr, rmarkdown, shiny (>= 0.11.1), htmltools,
         htmlwidgets (>= 0.7), DT (>= 0.2), testthat, rstudioapi (>=
         0.2), devtools, xml2 (>= 1.0.0), parallel, memoise
-License: MIT + file LICENSE
+License: GPL-3
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1.9000
+RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2017-01-04 19:12:39 UTC; jhester
+Packaged: 2017-06-26 17:42:39 UTC; jhester
 Author: Jim Hester [aut, cre],
   Willem Ligtenberg [ctb],
   Kirill Müller [ctb],
@@ -62,7 +64,9 @@ Author: Jim Hester [aut, cre],
   Kun Ren [ctb],
   Jeroen Ooms [ctb],
   Ken Williams [ctb],
-  Chris Campbell [ctb]
+  Chris Campbell [ctb],
+  David Hugh-Jones [ctb],
+  Qin Wang [ctb]
 Maintainer: Jim Hester <james.f.hester@gmail.com>
 Repository: CRAN
-Date/Publication: 2017-01-05 10:39:29
+Date/Publication: 2017-06-26 17:52:33 UTC

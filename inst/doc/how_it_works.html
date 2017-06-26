@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jim Hester" />
 
-<meta name="date" content="2017-01-04" />
+<meta name="date" content="2017-06-26" />
 
 <title>How does covr work anyway?</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">How does covr work anyway?</h1>
 <h4 class="author"><em>Jim Hester</em></h4>
-<h4 class="date"><em>2017-01-04</em></h4>
+<h4 class="date"><em>2017-06-26</em></h4>
 
 
 
@@ -90,8 +90,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Modifying the call tree</h2>
 <p>The core function in <strong>covr</strong> is <code>trace_calls()</code>. This function was adapted from ideas in <a href="http://adv-r.had.co.nz/Expressions.html#ast-funs"><em>Advanced R - Walking the Abstract Syntax Tree with recursive functions</em></a>. This recursive function modifies each of the leaves (atomic or name objects) of an R expression by applying a given function to them. If the expression is not a leaf the walker function calls itself recursively on elements of the expression instead.</p>
 <p>We can use this same framework to instead insert a trace statement before each call by replacing each call with a call to a counting function followed by the previous call. Braces (<code>{</code>) in R may seem like language syntax, but they are actually a Primitive function and you can call them like any other function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(<span class="dt">x =</span> { <span class="dv">1</span> +<span class="st"> </span><span class="dv">2</span>; <span class="dv">3</span> +<span class="st"> </span><span class="dv">4</span> },
-    <span class="dt">y =</span> <span class="st">`</span><span class="dt">{</span><span class="st">`</span>(<span class="dv">1</span> +<span class="st"> </span><span class="dv">2</span>, <span class="dv">3</span> +<span class="st"> </span><span class="dv">4</span>))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">identical</span>(<span class="dt">x =</span> { <span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">2</span>; <span class="dv">3</span> <span class="op">+</span><span class="st"> </span><span class="dv">4</span> },
+    <span class="dt">y =</span> <span class="st">`</span><span class="dt">{</span><span class="st">`</span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">2</span>, <span class="dv">3</span> <span class="op">+</span><span class="st"> </span><span class="dv">4</span>))</code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>Remembering that braces always return the value of the last evaluated expression, we can call a counting function followed by the previous function substituting <code>as.call(recurse(x))</code> in our function above with.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="st">`</span><span class="dt">{</span><span class="st">`</span>(<span class="kw">count</span>(), <span class="kw">as.call</span>(<span class="kw">recurse</span>(x)))</code></pre></div>
@@ -104,26 +104,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="refining-source-references" class="section level2">
 <h2>Refining Source References</h2>
 <p>Each statement comes with a source reference. Unfortunately, the following is counted as one statement:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">if (x)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span> (x)
  <span class="kw">y</span>()</code></pre></div>
 <p>To work around this, detailed parse data (obtained from a refined version of <code>getParseData</code>) is analyzed to impute source references at sub-statement level for <code>if</code>, <code>for</code>, <code>while</code> and <code>switch</code> constructs.</p>
 </div>
 <div id="replacing-source-in-place" class="section level2">
 <h2>Replacing Source In Place</h2>
 <p>After we have our modified function definition, how do we re-define the function to use the updated definition, and ensure that all other functions which call the old function also use the new definition? You might try redefining the function directly.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f1 &lt;-<span class="st"> </span>function() <span class="dv">1</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">f1 &lt;-<span class="st"> </span><span class="cf">function</span>() <span class="dv">1</span>
 
-f1 &lt;-<span class="st"> </span>function() <span class="dv">2</span>
-<span class="kw">f1</span>() ==<span class="st"> </span><span class="dv">2</span></code></pre></div>
+f1 &lt;-<span class="st"> </span><span class="cf">function</span>() <span class="dv">2</span>
+<span class="kw">f1</span>() <span class="op">==</span><span class="st"> </span><span class="dv">2</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>While this does work for the simple case of calling the new function in the same environment, it fails if another function calls a function in a different environment.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">env &lt;-<span class="st"> </span><span class="kw">new.env</span>()
-f1 &lt;-<span class="st"> </span>function() <span class="dv">1</span>
-env$f2 &lt;-<span class="st"> </span>function() <span class="kw">f1</span>() +<span class="st"> </span><span class="dv">1</span>
+f1 &lt;-<span class="st"> </span><span class="cf">function</span>() <span class="dv">1</span>
+env<span class="op">$</span>f2 &lt;-<span class="st"> </span><span class="cf">function</span>() <span class="kw">f1</span>() <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
 
-env$f1 &lt;-<span class="st"> </span>function() <span class="dv">2</span>
+env<span class="op">$</span>f1 &lt;-<span class="st"> </span><span class="cf">function</span>() <span class="dv">2</span>
 
-env$<span class="kw">f2</span>() ==<span class="st"> </span><span class="dv">3</span></code></pre></div>
+env<span class="op">$</span><span class="kw">f2</span>() <span class="op">==</span><span class="st"> </span><span class="dv">3</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
 <p>As modifying external environments and correctly restoring them can be tricky to get correct, we use the C function <a href="https://github.com/jimhester/covr/blob/9753e0e257b053059b85be90ef6eb614a5af9bba/src/reassign.c#L7-L20"><code>reassign_function</code></a>, which is also used in <code>testthat::with_mock</code>. This function takes a function name, environment, old definition, new definition and copies the formals, body, attributes and environment from the old function to the new function. This allows you to do an in-place replacement of a given function with a new function and ensure that all references to the old function will use the new definition.</p>
 </div>
@@ -167,14 +167,14 @@ env$<span class="kw">f2</span>() ==<span class="st"> </span><span class="dv">3</
 <h1>Output Formats</h1>
 <p>The output format returned by <strong>covr</strong> is an R object of class “coverage” containing the information gathered when executing the test suite. It consists of a named list, where the names are colon-delimited information from the source references (the file, line and columns the traced call is from). The value is the number of times that given expression was called and the source ref of the original call.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># an object to analyse</span>
-f1 &lt;-<span class="st"> </span>function(x) { x +<span class="st"> </span><span class="dv">1</span> }
+f1 &lt;-<span class="st"> </span><span class="cf">function</span>(x) { x <span class="op">+</span><span class="st"> </span><span class="dv">1</span> }
 <span class="co"># get results with no unit tests</span>
 c1 &lt;-<span class="st"> </span><span class="kw">function_coverage</span>(<span class="dt">fun =</span> f1, <span class="dt">code =</span> <span class="ot">NULL</span>)
 c1</code></pre></div>
 <pre><code>## Coverage: 0.00%</code></pre>
 <pre><code>## &lt;text&gt;: 0.00%</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get results with unit tests</span>
-c2 &lt;-<span class="st"> </span><span class="kw">function_coverage</span>(<span class="dt">fun =</span> f1, <span class="dt">code =</span> <span class="kw">f1</span>(<span class="dt">x =</span> <span class="dv">1</span>) ==<span class="st"> </span><span class="dv">2</span>)
+c2 &lt;-<span class="st"> </span><span class="kw">function_coverage</span>(<span class="dt">fun =</span> f1, <span class="dt">code =</span> <span class="kw">f1</span>(<span class="dt">x =</span> <span class="dv">1</span>) <span class="op">==</span><span class="st"> </span><span class="dv">2</span>)
 c2</code></pre></div>
 <pre><code>## Coverage: 100.00%</code></pre>
 <pre><code>## &lt;text&gt;: 100.00%</code></pre>
@@ -217,7 +217,7 @@ c2</code></pre></div>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
