@@ -1,13 +1,65 @@
 # Covr #
-[![Build Status](https://travis-ci.org/jimhester/covr.svg?branch=master)](https://travis-ci.org/jimhester/covr)
+[![Build Status](https://travis-ci.org/r-lib/covr.svg?branch=master)](https://travis-ci.org/r-lib/covr)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/jimhester/covr?branch=master&svg=true)](https://ci.appveyor.com/project/jimhester/covr)
-[![codecov.io](https://codecov.io/github/jimhester/covr/coverage.svg?branch=master)](https://codecov.io/github/jimhester/covr?branch=master)
+[![codecov.io](https://codecov.io/github/r-lib/covr/coverage.svg?branch=master)](https://codecov.io/github/r-lib/covr?branch=master)
 [![CRAN version](http://www.r-pkg.org/badges/version/covr)](https://cran.r-project.org/package=covr)
 
-Track test coverage for your R package and (optionally) upload the results to
-[coveralls](https://coveralls.io/) or [codecov](https://codecov.io/).
+Track test coverage for your R package and view reports locally or (optionally)
+upload the results to [codecov](https://codecov.io/) or [coveralls](https://coveralls.io/).
 
 # Installation #
+
+```r
+install.packages("covr")
+
+# For devel version
+devtools::install_github("r-lib/covr")
+```
+
+The easiest way to setup covr on [Travis-CI](https://travis-ci.org)
+is with [usethis](https://github.com/r-lib/usethis).
+
+```r
+usethis::use_coverage()
+```
+
+# Usage #
+
+A coverage report can be used to inspect coverage for each line in your
+package. Using `report()` requires [shiny](https://github.com/rstudio/shiny).
+
+```r
+library(covr)
+
+# If run with no arguments implicitly calls `package_coverage()`
+report()
+```
+
+covr also defines an [RStudio Addin](https://rstudio.github.io/rstudioaddins/),
+which runs `report()` on the active project. This can be used via the addin
+menu or by binding the action to a
+[shortcut](https://rstudio.github.io/rstudioaddins/#keyboard-shorcuts), e.g.
+*Ctrl-Shift-C*.
+
+## Interactively ##
+```r
+# if `getwd()` is the package's directory.
+package_coverage()
+
+# or a package in another directory
+cov <- package_coverage("/dir/lintr")
+
+# view results as a data.frame
+as.data.frame(cov)
+
+# zero_coverage() shows only uncovered lines.
+# If run within RStudio, `zero_coverage()` will open a marker pane with the
+# uncovered lines.
+zero_coverage(cov)
+```
+
+# Manual Installation
+
 ## Codecov ##
 If you are already using [Travis-CI](https://travis-ci.org) or [Appveyor CI](http://ci.appveyor.com) add the
 following to your project's `.travis.yml` to track your coverage results
@@ -15,7 +67,7 @@ over time with [Codecov](https://codecov.io).
 
 ```yml
 r_github_packages:
-  - jimhester/covr
+  - r-lib/covr
 
 after_success:
   - Rscript -e 'covr::codecov()'
@@ -45,7 +97,7 @@ using `coveralls()`.
 
 ```yml
 r_github_packages:
-  - jimhester/covr
+  - r-lib/covr
 
 after_success:
   - Rscript -e 'covr::coveralls()'
@@ -56,41 +108,6 @@ environment variable. It is wise to use a [Secure Variable](http://docs.travis-c
 so that it is not revealed publicly.
 
 Also you will need to turn on coveralls for your project at <https://coveralls.io/repos>.
-
-# Interactive Usage #
-
-## Shiny Application ##
-A [shiny](http://shiny.rstudio.com/) Application can be used to
-view coverage per line.
-```r
-cov <- package_coverage()
-
-shine(cov)
-```
-
-If used with `type = "all", combine_types = FALSE` the Shiny Application will
-allow you to interactively toggle between Test, Vignette and Example coverage.
-
-```r
-cov <- package_coverage(type = "all", combine_types = FALSE)
-
-shine(cov)
-```
-
-## R Command Line ##
-```r
-# if your working directory is in the packages base directory
-package_coverage()
-
-# or a package in another directory
-cov <- package_coverage("lintr")
-
-# view results as a data.frame
-as.data.frame(cov)
-
-# zero_coverage() can be used to filter only uncovered lines.
-zero_coverage(cov)
-```
 
 # Exclusions #
 
@@ -171,7 +188,7 @@ options(covr.gcov = "path/to/gcov")
 to each call.
 
 The vignette
-[vignettes/how_it_works.Rmd](https://github.com/jimhester/covr/blob/master/vignettes/how_it_works.Rmd)
+[vignettes/how_it_works.Rmd](https://github.com/r-lib/covr/blob/master/vignettes/how_it_works.Rmd)
 contains a detailed explanation of the technique and the rationale behind it.
 
 You can view the vignette from within `R` using

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jim Hester" />
 
-<meta name="date" content="2017-06-26" />
+<meta name="date" content="2017-11-07" />
 
 <title>How does covr work anyway?</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">How does covr work anyway?</h1>
 <h4 class="author"><em>Jim Hester</em></h4>
-<h4 class="date"><em>2017-06-26</em></h4>
+<h4 class="date"><em>2017-11-07</em></h4>
 
 
 
@@ -125,7 +125,7 @@ env<span class="op">$</span>f1 &lt;-<span class="st"> </span><span class="cf">fu
 
 env<span class="op">$</span><span class="kw">f2</span>() <span class="op">==</span><span class="st"> </span><span class="dv">3</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<p>As modifying external environments and correctly restoring them can be tricky to get correct, we use the C function <a href="https://github.com/jimhester/covr/blob/9753e0e257b053059b85be90ef6eb614a5af9bba/src/reassign.c#L7-L20"><code>reassign_function</code></a>, which is also used in <code>testthat::with_mock</code>. This function takes a function name, environment, old definition, new definition and copies the formals, body, attributes and environment from the old function to the new function. This allows you to do an in-place replacement of a given function with a new function and ensure that all references to the old function will use the new definition.</p>
+<p>As modifying external environments and correctly restoring them can be tricky to get correct, we use the C function <a href="https://github.com/r-lib/covr/blob/9753e0e257b053059b85be90ef6eb614a5af9bba/src/reassign.c#L7-L20"><code>reassign_function</code></a>, which is also used in <code>testthat::with_mock</code>. This function takes a function name, environment, old definition, new definition and copies the formals, body, attributes and environment from the old function to the new function. This allows you to do an in-place replacement of a given function with a new function and ensure that all references to the old function will use the new definition.</p>
 </div>
 </div>
 <div id="object-orientation" class="section level1">

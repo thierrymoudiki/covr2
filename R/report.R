@@ -1,9 +1,8 @@
 #' Display covr results using a standalone report
 #'
-#' @param x a coverage dataset
+#' @param x a coverage dataset, defaults to running `package_coverage()`.
 #' @param file The report filename.
 #' @param browse whether to open a browser to view the report.
-#' @aliases shine
 #' @examples
 #' \dontrun{
 #' x <- package_coverage()
@@ -13,7 +12,7 @@
 # This function was originally a shiny application, but has been converted into
 # a normal static document. Hence the shiny calls / dependency despite not
 # actually using shiny.
-report <- function(x,
+report <- function(x = package_coverage(),
   file = file.path(tempdir(), paste0(get_package_name(x), "-report.html")),
   browse = interactive()) {
 
@@ -172,6 +171,22 @@ addHighlight <- function(x = list()) {
   htmltools::attachDependencies(x, c(htmltools::htmlDependencies(x), list(highlight)))
 }
 
+#' Deprecated Functions
+
+#' These functions are Deprecated in this release of covr, they will be
+#' marked as Defunct and removed in a future version.
+#'
 #' @export
-#' @rdname report
-shine <- report
+#' @keywords internal
+#' @rdname covr-deprecated
+shine <- function(...) {
+  .Deprecated("report()", package = "covr")
+  report(...)
+}
+addin_report <- function() {
+  loadNamespace("rstudioapi")
+
+  project <- rstudioapi::getActiveProject()
+
+  covr::report(covr::package_coverage(project %||% getwd()))
+}

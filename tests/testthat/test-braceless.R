@@ -50,3 +50,21 @@ test_that("switch", {
   expect_equal(diff(zero_coverage(code_coverage(f, "f(\"a\"); f(\"d\")"))$line),
     1)
 })
+
+test_that("switch with default value", {
+  f <-
+'f <- function(x) {
+  switch(x,
+    a = 1,
+    b = 2,
+    c = d <- 1,
+    NULL
+  )
+}'
+
+  expect_equal(length(zero_coverage(code_coverage(f, "f(\"a\"); f(\"b\"); f(\"c\")"))$line),
+    1)
+
+  expect_equal(length(zero_coverage(code_coverage(f, "f(\"a\"); f(\"c\")"))$line),
+    2)
+})
