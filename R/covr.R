@@ -1,3 +1,22 @@
+#' covr: Test coverage for packages
+#'
+#' covr tracks and reports code coverage for your package and (optionally)
+#' upload the results to a coverage service like 'Codecov' <http://codecov.io> or
+#' 'Coveralls' <http://coveralls.io>. Code coverage is a measure of the amount of
+#' code being exercised by a set of tests. It is an indirect measure of test
+#' quality and completeness. This package is compatible with any testing
+#' methodology or framework and tracks coverage of both R code and compiled
+#' C/C++/FORTRAN code.
+#'
+#' A coverage report can be used to inspect coverage for each line in your
+#' package. Using `report()` requires [shiny](https://github.com/rstudio/shiny).
+#'
+#' ```r
+#' # If run with no arguments `report()` implicitly calls `package_coverage()`
+#' report()
+#' ```
+"_PACKAGE"
+
 #' @import methods
 #' @importFrom stats aggregate na.omit na.pass setNames
 #' @importFrom utils capture.output getSrcFilename relist str head
@@ -65,9 +84,9 @@ function_coverage <- function(fun, code = NULL, env = NULL, enc = parent.frame()
 
 #' Calculate test coverage for sets of files
 #'
-#' The files in \code{source_files} are first sourced into a new environment
+#' The files in `source_files` are first sourced into a new environment
 #' to define functions to be checked. Then they are instrumented to track
-#' coverage and the files in \code{test_files} are sourced.
+#' coverage and the files in `test_files` are sourced.
 #' @param source_files Character vector of source files with function
 #'   definitions to measure coverage
 #' @param test_files Character vector of test files with code to test the
@@ -84,8 +103,10 @@ file_coverage <- function(
 
   env <- new.env(parent = parent_env)
 
-  lapply(source_files,
-     sys.source, keep.source = TRUE, envir = env)
+  withr::with_options(c("keep.parse.data.pkgs" = TRUE), {
+    lapply(source_files,
+      sys.source, keep.source = TRUE, envir = env)
+  })
 
   trace_environment(env)
   on.exit({
@@ -94,7 +115,7 @@ file_coverage <- function(
   })
 
   lapply(test_files,
-     sys.source, keep.source = TRUE, envir = env)
+    sys.source, keep.source = TRUE, envir = env)
 
   coverage <- structure(as.list(.counters), class = "coverage")
 
@@ -107,12 +128,12 @@ file_coverage <- function(
 #' Calculate coverage of code directly
 #'
 #' This function is useful for testing, and is a thin wrapper around
-#' \code{\link{file_coverage}} because parseData is not populated properly
+#' [file_coverage()] because parseData is not populated properly
 #' unless the functions are defined in a file.
 #' @param source_code A character vector of source code
 #' @param test_code A character vector of test code
 #' @inheritParams file_coverage
-#' @param ... Additional arguments passed to \code{\link{file_coverage}}
+#' @param ... Additional arguments passed to [file_coverage()]
 #' @export
 code_coverage <- function(
    source_code,
@@ -132,29 +153,29 @@ code_coverage <- function(
 #' Calculate test coverage for a package
 #'
 #' This function calculates the test coverage for a development package on the
-#' \code{path}. By default it runs only the package tests, but it can also run
+#' `path`. By default it runs only the package tests, but it can also run
 #' vignette and example code.
 #'
 #' @details
-#' This function uses \code{\link[tools]{testInstalledPackage}} to run the
+#' This function uses [tools::testInstalledPackage()] to run the
 #' code, if you would like to test your package in another way you can set
-#' \code{type = "none"} and pass the code to run as a character vector to the
-#' \code{code} parameter.
+#' `type = "none"` and pass the code to run as a character vector to the
+#' `code` parameter.
 #'
 #' #ifdef unix
-#' Parallelized code using \pkg{parallel}'s \code{\link{mcparallel}} needs to
-#' be use a patched \code{parallel:::mcexit}. This is done automatically if the
+#' Parallelized code using \pkg{parallel}'s [mcparallel()] needs to
+#' be use a patched `parallel:::mcexit`. This is done automatically if the
 #' package depends on \pkg{parallel}, but can also be explicitly set using the
-#' environment variable \code{COVR_FIX_PARALLEL_MCEXIT} or the global option
-#' \code{covr.fix_parallel_mcexit}.
+#' environment variable `COVR_FIX_PARALLEL_MCEXIT` or the global option
+#' `covr.fix_parallel_mcexit`.
 #' #endif
 #'
 #' @param path file path to the package.
 #' @param type run the package \sQuote{tests}, \sQuote{vignettes},
 #' \sQuote{examples}, \sQuote{all}, or \sQuote{none}. The default is
 #' \sQuote{tests}.
-#' @param combine_types If \code{TRUE} (the default) the coverage for all types
-#' is simply summed into one coverage object. If \code{FALSE} separate objects
+#' @param combine_types If `TRUE` (the default) the coverage for all types
+#' is simply summed into one coverage object. If `FALSE` separate objects
 #' are used for each type of coverage.
 #' @param relative_path whether to output the paths as relative or absolute
 #' paths.
@@ -165,11 +186,11 @@ code_coverage <- function(
 #' @param line_exclusions a named list of files with the lines to exclude from
 #' each file.
 #' @param function_exclusions a vector of regular expressions matching function
-#' names to exclude. Example \code{print\\.} to match print methods.
+#' names to exclude. Example `print\\\.` to match print methods.
 #' @param code A character vector of additional test code to run.
-#' @param ... Additional arguments passed to \code{\link[tools]{testInstalledPackage}}.
+#' @param ... Additional arguments passed to [tools::testInstalledPackage()].
 #' @param exclusions \sQuote{Deprecated}, please use \sQuote{line_exclusions} instead.
-#' @seealso \code{\link{exclusions}} For details on excluding parts of the
+#' @seealso [exclusions()] For details on excluding parts of the
 #' package from the coverage calculations.
 #' @export
 package_coverage <- function(path = ".",
@@ -257,6 +278,7 @@ package_coverage <- function(path = ".",
                             INSTALL_opts = c("--example",
                                              "--install-tests",
                                              "--with-keep.source",
+                                             "--with-keep.parse.data",
                                              "--no-multiarch"),
                             quiet = quiet))
 
@@ -324,12 +346,25 @@ package_coverage <- function(path = ".",
   coverage <- filter_non_package_files(coverage)
 
   # Exclude both RcppExports to avoid reduntant coverage information
-  line_exclusions <- c("src/RcppExports.cpp", "R/RcppExports.R", line_exclusions)
+  line_exclusions <- c("src/RcppExports.cpp", "R/RcppExports.R", line_exclusions, parse_covr_ignore())
 
   exclude(coverage,
     line_exclusions = line_exclusions,
     function_exclusions = function_exclusions,
     path = if (isTRUE(relative_path)) pkg$path else NULL)
+}
+
+#' Convert a coverage dataset to a list
+#'
+#' @param x a coverage dataset, defaults to running `package_coverage()`.
+#' @return A list containing coverage result for each individual file and the whole package
+#' @export
+coverage_to_list <- function(x = package_coverage()){
+  covr_df <- tally_coverage(x)
+  file_result <- tapply(covr_df$value, covr_df$filename,
+    FUN = function(x) round(sum(x > 0) / length(x) * 100, digits = 2))
+  total_result <- round(sum(covr_df$value > 0) / nrow(covr_df) * 100, digits = 2)
+  return(list(filecoverage = file_result, totalcoverage = total_result))
 }
 
 show_failures <- function(dir) {
@@ -360,10 +395,13 @@ merge_coverage <- function(files) {
   names <- names(x)
   for (i in 2:nfiles) {
     y <- readRDS(files[i])
-    stopifnot(identical(names(y), names))
-    for (name in names) {
+    for (name in intersect(names, names(y))) {
       x[[name]]$value <- x[[name]]$value + y[[name]]$value
     }
+    for (name in setdiff(names(y), names)) {
+      x[[name]] <- y[[name]]
+    }
+    names <- union(names, names(y))
     y <- NULL
   }
 
@@ -451,13 +489,4 @@ add_hooks <- function(pkg_name, lib, fix_mcexit = FALSE) {
   }
 
   writeLines(text = lines, con = load_script)
-}
-
-# check if icc is used
-uses_icc <- function() {
-  compiler <- tryCatch(
-    paste(system(paste(R.home("bin"), "R --vanilla CMD config CC", sep="/"),
-        intern = TRUE), collapse=""),
-    error = function(e) "")
-  grepl("\\bicc\\b", compiler)
 }

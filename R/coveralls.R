@@ -1,15 +1,15 @@
 #' Run covr on a package and upload the result to coveralls
-#' @param coverage an existing coverage object to submit, if \code{NULL},
-#' \code{\link{package_coverage}} will be called with the arguments from
-#' \code{...}
-#' @param ... arguments passed to \code{\link{package_coverage}}
+#' @param coverage an existing coverage object to submit, if `NULL`,
+#' [package_coverage()] will be called with the arguments from
+#' `...`
+#' @param ... arguments passed to [package_coverage()]
 #' @param repo_token The secret repo token for your repository,
 #' found at the bottom of your repository's page on Coveralls. This is useful
 #' if your job is running on a service Coveralls doesn't support out-of-the-box.
 #' If set to NULL, it is assumed that the job is running on travis-ci
 #' @param service_name the CI service to use, if environment variable
 #' \sQuote{CI_NAME} is set that is used, otherwise \sQuote{travis-ci} is used.
-#' @param quiet if \code{FALSE}, print the coverage before submission.
+#' @param quiet if `FALSE`, print the coverage before submission.
 #' @export
 coveralls <- function(..., coverage = NULL,
                       repo_token = Sys.getenv("COVERALLS_TOKEN"),
@@ -54,15 +54,18 @@ to_coveralls <- function(x, service_job_id = Sys.getenv("TRAVIS_JOB_ID"),
   coverages <- per_line(x)
 
   res <- Map(function(coverage, name) {
+      source_code <- paste(collapse = "\n", coverage$file$file_lines)
       list(
         "name" = jsonlite::unbox(name),
-        "source" = jsonlite::unbox(paste(collapse = "\n", coverage$file$file_lines)),
+        "source" = jsonlite::unbox(source_code),
+        "source_digest" = jsonlite::unbox(digest::digest(source_code, algo = "md5", serialize = FALSE)),
         "coverage" = coverage$coverage)
     }, coverages, names(coverages), USE.NAMES = FALSE)
 
   git_info <- switch(service_name,
     drone = jenkins_git_info(), # drone has the same env vars as jenkins
     jenkins = jenkins_git_info(),
+    'travis-pro' = jenkins_git_info(),
     list(NULL)
   )
 
@@ -74,8 +77,9 @@ to_coveralls <- function(x, service_job_id = Sys.getenv("TRAVIS_JOB_ID"),
   } else {
     tmp <- list(
       "repo_token" = jsonlite::unbox(repo_token),
+      "service_name" = jsonlite::unbox(service_name),
       "source_files" = res)
-    tmp$git <- list(git_info)
+    tmp$git <- git_info
     tmp
   }
 

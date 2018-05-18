@@ -1,3 +1,29 @@
+## 3.1.0 ##
+
+## Breaking changes
+
+* `shine()` has been deprecated in favor of `report()`.
+
+## New Features
+
+* Add support for `.covrignore` files (#238), to exclude files from the coverage.
+
+* Support future versions of R which do not use parse data by default (#309).
+
+* Allow using `trace_calls()` for manually adding functions to package trace
+  that are not found automatically (#295, @mb706).
+
+## Bugfixes
+
+* Fix errors when R is not in the `PATH` (#291)
+
+* Fix line computations when relative paths are being used (#242).
+
+* Fix for Coveralls `Build processing error.` (#285) on pro accounts from
+  Travis CI (#306, @kiwiroy).
+
+* Keep attributes of function bodies (#311, @gaborcsardi)
+
 ## 3.0.1 ##
 * Add an RStudio Addin for running a coverage report.
 

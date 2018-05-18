@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Package: covr
 Title: Test Coverage for Packages
-Version: 3.0.1
+Version: 3.1.0
 Authors@R: c(
     person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre")),
     person("Willem", "Ligtenberg", role = "ctb"),
@@ -35,16 +35,17 @@ Description: Track and report code coverage for your package and (optionally)
 URL: https://github.com/r-lib/covr
 BugReports: https://github.com/r-lib/covr/issues
 Depends: R (>= 3.1.0), methods
-Imports: stats, utils, jsonlite, rex, httr, crayon, withr (>= 1.0.2)
+Imports: digest, stats, utils, jsonlite, rex, httr, crayon, withr (>=
+        1.0.2)
 Suggests: R6, knitr, rmarkdown, shiny (>= 0.11.1), htmltools,
         htmlwidgets (>= 0.7), DT (>= 0.2), testthat, rstudioapi (>=
         0.2), xml2 (>= 1.0.0), parallel, memoise, mockery
 License: GPL-3
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 NeedsCompilation: yes
-Packaged: 2017-11-07 21:50:28 UTC; jhester
+Packaged: 2018-05-18 20:07:04 UTC; jhester
 Author: Jim Hester [aut, cre],
   Willem Ligtenberg [ctb],
   Kirill Müller [ctb],
@@ -69,4 +70,4 @@ Author: Jim Hester [aut, cre],
   Qin Wang [ctb]
 Maintainer: Jim Hester <james.f.hester@gmail.com>
 Repository: CRAN
-Date/Publication: 2017-11-07 23:00:57 UTC
+Date/Publication: 2018-05-18 21:47:54 UTC
