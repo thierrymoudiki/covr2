@@ -9,7 +9,7 @@
 #' C/C++/FORTRAN code.
 #'
 #' A coverage report can be used to inspect coverage for each line in your
-#' package. Using `report()` requires [shiny](https://github.com/rstudio/shiny).
+#' package. Using `report()` requires the additional dependencies `DT` and `htmltools`.
 #'
 #' ```r
 #' # If run with no arguments `report()` implicitly calls `package_coverage()`
@@ -150,6 +150,36 @@ code_coverage <- function(
     function_exclusions = function_exclusions, ...)
 }
 
+#' Calculate coverage of an environment
+#'
+#' @param env The environment to be instrumented.
+#' @inheritParams file_coverage
+#' @export
+environment_coverage <- function(
+  env = parent.frame(),
+  test_files,
+  line_exclusions = NULL,
+  function_exclusions = NULL) {
+
+  exec_env <- new.env(parent = env)
+
+  trace_environment(env)
+  on.exit({
+    reset_traces()
+    clear_counters()
+  })
+
+  lapply(test_files,
+    sys.source, keep.source = TRUE, envir = exec_env)
+
+  coverage <- structure(as.list(.counters), class = "coverage")
+
+  exclude(coverage,
+    line_exclusions = line_exclusions,
+    function_exclusions = function_exclusions,
+    path = NULL)
+}
+
 #' Calculate test coverage for a package
 #'
 #' This function calculates the test coverage for a development package on the
@@ -263,6 +293,7 @@ package_coverage <- function(path = ".",
       clean_objects(pkg$path)
       clean_gcov(pkg$path)
       clean_parse_data()
+      unlink(tmp_lib, recursive = TRUE)
     }, add = TRUE)
   }
 
@@ -343,9 +374,13 @@ package_coverage <- function(path = ".",
       package = pkg,
       relative = relative_path)
 
+  if (!clean) {
+    attr(coverage, "library") <- tmp_lib
+  }
+
   coverage <- filter_non_package_files(coverage)
 
-  # Exclude both RcppExports to avoid reduntant coverage information
+  # Exclude both RcppExports to avoid redundant coverage information
   line_exclusions <- c("src/RcppExports.cpp", "R/RcppExports.R", line_exclusions, parse_covr_ignore())
 
   exclude(coverage,
@@ -371,9 +406,26 @@ show_failures <- function(dir) {
   fail_files <- list.files(dir, pattern = "fail$", recursive = TRUE, full.names = TRUE)
   for (file in fail_files) {
     lines <- readLines(file)
+
     # Skip header lines (until first >)
-    lines <- lines[seq(head(which(grepl("^>", lines)), n = 1), length(lines))]
-    stop("Failure in `", file, "`\n", paste(lines, collapse = "\n"), call. = FALSE)
+    lines <- lines[seq(which.min(grepl("^>", lines)), length(lines))]
+
+
+    # R will only show options("warning.length") number of characters in an
+    # error, so show the last characters of that number
+    error_header <- paste0("Failure in `", file, "`\n")
+
+    # 9 is the length of `Error: ` + newline + NUL maybe?
+    error_length <- getOption("warning.length") - 9
+    error_body <- paste(lines, collapse = "\n")
+
+    header_len <- nchar(error_header, "bytes")
+    body_len <- nchar(error_body, "bytes")
+
+    error_body <- substr(error_body, body_len - (error_length - header_len), body_len)
+
+    cnd <- structure(list(message = paste0(error_header, error_body)), class = c("covr_error", "error", "condition"))
+    stop(cnd)
   }
 }
 
@@ -477,16 +529,23 @@ run_commands <- function(pkg, lib, commands) {
 # @param lib the library path to look in
 # @param fix_mcexit whether to add the fix for mcparallel:::mcexit
 add_hooks <- function(pkg_name, lib, fix_mcexit = FALSE) {
+  trace_dir <- paste0("Sys.getenv(\"COVERAGE_DIR\", \"", lib, "\")")
+
   load_script <- file.path(lib, pkg_name, "R", pkg_name)
   lines <- readLines(file.path(lib, pkg_name, "R", pkg_name))
   lines <- append(lines,
     c("setHook(packageEvent(pkg, \"onLoad\"), function(...) covr:::trace_environment(ns))",
-      paste0("reg.finalizer(ns, function(...) { covr:::save_trace(\"", lib, "\") }, onexit = TRUE)")),
+      paste0("reg.finalizer(ns, function(...) { covr:::save_trace(", trace_dir, ") }, onexit = TRUE)")),
     length(lines) - 1L)
 
   if (fix_mcexit) {
-    lines <- append(lines, sprintf("covr:::fix_mcexit('%s')", lib))
+    lines <- append(lines, sprintf("covr:::fix_mcexit('%s')", trace_dir))
   }
 
   writeLines(text = lines, con = load_script)
+}
+
+#' @export
+`[.coverage` <- function(x, ...) {
+  structure(NextMethod(), class = "coverage")
 }
