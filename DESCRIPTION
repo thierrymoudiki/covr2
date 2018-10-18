@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Package: covr
 Title: Test Coverage for Packages
-Version: 3.2.0
+Version: 3.2.1
 Authors@R: c(
     person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre")),
     person("Willem", "Ligtenberg", role = "ctb"),
@@ -51,7 +51,7 @@ LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 NeedsCompilation: yes
-Packaged: 2018-09-21 18:04:40 UTC; jhester
+Packaged: 2018-10-18 15:49:20 UTC; jhester
 Author: Jim Hester [aut, cre],
   Willem Ligtenberg [ctb],
   Kirill Müller [ctb],
@@ -81,4 +81,4 @@ Author: Jim Hester [aut, cre],
   Twitter, Inc [cph] (Bootstrap library)
 Maintainer: Jim Hester <james.f.hester@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-09-21 18:40:06 UTC
+Date/Publication: 2018-10-18 16:40:03 UTC
