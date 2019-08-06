@@ -99,7 +99,6 @@ without needing `CODECOV_TOKEN`).
 - [Travis CI\*](https://travis-ci.com)
 - [Codeship](https://www.codeship.com)
 - [Circleci\*](https://circleci.com)
-- [Semaphore](https://semaphoreapp.com)
 - [AppVeyor\*](http://ci.appveyor.com)
 - [Wercker](http://wercker.com)
 - [GitLab-CI](https://about.gitlab.com/gitlab-ci/)
@@ -197,6 +196,8 @@ f2 <- function(x) { # nocov start
 The patterns used can be specified by setting the global options
 `covr.exclude_pattern`, `covr.exclude_start`, `covr.exclude_end`.
 
+NB: The same pattern applies to exclusions in the `src` folder, so skipped lines in, e.g., C code (where comments can start with `//`) should look like `// # nocov`.
+
 
 # FAQ #
 ## Will covr work with testthat, RUnit, etc... ##
@@ -238,5 +239,5 @@ which _can_ modify behavior (usually due to package bugs which are masked with
 higher optimization levels).
 
 # Alternative Coverage Tools #
-- <https://github.com/MangoTheCat/testCoverage>
-- <http://r2d2.quartzbio.com/posts/r-coverage-docker.html>
+- <https://github.com/MangoTheCat/testCoverage> (no longer supported)
+- <http://r2d2.quartzbio.com/posts/r-coverage-docker.html> (no longer supported)

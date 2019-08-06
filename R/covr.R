@@ -220,6 +220,7 @@ environment_coverage <- function(
 #' @param code A character vector of additional test code to run.
 #' @param ... Additional arguments passed to [tools::testInstalledPackage()].
 #' @param exclusions \sQuote{Deprecated}, please use \sQuote{line_exclusions} instead.
+#' @param pre_clean whether to delete all objects present in the src directory before recompiling
 #' @seealso [exclusions()] For details on excluding parts of the
 #' package from the coverage calculations.
 #' @export
@@ -233,7 +234,7 @@ package_coverage <- function(path = ".",
                              function_exclusions = NULL,
                              code = character(),
                              ...,
-                             exclusions) {
+                             exclusions, pre_clean=TRUE) {
 
   if (!missing(exclusions)) {
     warning(paste0("`exclusions` is deprecated and will be removed in an upcoming
@@ -298,7 +299,7 @@ package_coverage <- function(path = ".",
   }
 
   # clean any dlls prior to trying to install
-  clean_objects(pkg$path)
+  if (isTRUE(pre_clean)) clean_objects(pkg$path)
 
   # install the package in a temporary directory
   withr::with_makevars(flags, assignment = "+=",
@@ -310,6 +311,7 @@ package_coverage <- function(path = ".",
                                              "--install-tests",
                                              "--with-keep.source",
                                              "--with-keep.parse.data",
+                                             "--no-staged-install",
                                              "--no-multiarch"),
                             quiet = quiet))
 
@@ -438,7 +440,7 @@ merge_coverage <- function(files) {
     return()
   }
 
-  x <- readRDS(files[1])
+  x <- suppressWarnings(readRDS(files[1]))
   x <- as.list(x)
   if (nfiles == 1) {
     return(x)
@@ -446,7 +448,7 @@ merge_coverage <- function(files) {
 
   names <- names(x)
   for (i in 2:nfiles) {
-    y <- readRDS(files[i])
+    y <- suppressWarnings(readRDS(files[i]))
     for (name in intersect(names, names(y))) {
       x[[name]]$value <- x[[name]]$value + y[[name]]$value
     }

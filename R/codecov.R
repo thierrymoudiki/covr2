@@ -5,14 +5,20 @@
 #' @param ... arguments passed to [package_coverage()]
 #' @param base_url Codecov url (change for Enterprise)
 #' @param quiet if `FALSE`, print the coverage before submission.
-#' @param token a codecov upload token, if `NULL` the environment
-#' variable \sQuote{CODECOV_TOKEN} is used.
+#' @param token a codecov upload token, if `NULL` then following external
+#'   sources will be checked in this order:
+#'   1. the environment variable \sQuote{CODECOV_TOKEN}. If it is empty, then
+#'   1. package will look at directory of the package for a file `codecov.yml`.
+#'   File must have `codecov` section where field `token` is set to a token that
+#'   will be used.
 #' @param commit explicitly set the commit this coverage result object
 #' corresponds to. Is looked up from the service or locally if it is
 #' `NULL`.
 #' @param branch explicitly set the branch this coverage result object
 #' corresponds to, this is looked up from the service or locally if it is
 #' `NULL`.
+#' @param flags A flag to use for this coverage upload see
+#'   <https://docs.codecov.io/docs/flags> for details.
 #' @export
 #' @examples
 #' \dontrun{
@@ -24,6 +30,7 @@ codecov <- function(...,
                     token = NULL,
                     commit = NULL,
                     branch = NULL,
+                    flags = NULL,
                     quiet = TRUE) {
 
   if (is.null(coverage)) {
@@ -151,7 +158,11 @@ codecov <- function(...,
                           commit = commit %||% current_commit())
   }
 
-  token <- token %||% Sys.getenv("CODECOV_TOKEN")
+  # Add flags parameter
+  codecov_query$flags <- flags
+
+  token <- token %||% Sys.getenv("CODECOV_TOKEN", extract_from_yaml(attr(coverage, "package")$path))
+
   if (nzchar(token)) {
     codecov_query$token <- token
   }
@@ -159,6 +170,15 @@ codecov <- function(...,
   coverage_json <- to_codecov(coverage)
 
   httr::content(httr::POST(url = codecov_url, query = codecov_query, body = coverage_json, encode = "json"))
+}
+
+extract_from_yaml <- function(path){
+  path_to_yaml <- file.path(path, "codecov.yml")
+  if (file.exists(path_to_yaml)) {
+    yaml::read_yaml(path_to_yaml)[["codecov"]][["token"]] %||% ""
+  } else {
+    ""
+  }
 }
 
 to_codecov <- function(x) {
