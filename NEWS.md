@@ -1,3 +1,11 @@
+# covr 3.3.1
+
+* Fix inadvertent regression in return visibility when functions are covered.
+  covr versions prior to 3.3.0 surrounded each statement in `{` blocks. covr
+  3.3.0 switched to using `({`, but this caused an inadvertent regression, as
+  `(` will make the result visible it is the last expression in a function.
+  Using `if (TRUE) {` restores the previous behavior. (#391, #392)
+
 # covr 3.3.0
 
 ## New Features
