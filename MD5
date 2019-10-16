@@ -1,6 +1,6 @@
-573864e2693c163cb879812974342a82 *DESCRIPTION
-5964b85a6c6e12915ca98534aac38e0e *NAMESPACE
-db7631eaa428524443851ca6751f85fb *NEWS.md
+96689201d3923acaa19ee006ca3f2cc4 *DESCRIPTION
+469c7ad7c9a1fd962cea47aecdbd97b7 *NAMESPACE
+989ca9951526fc9c732ac929e5346369 *NEWS.md
 5dfc2a5b79f68471020deae5dab42175 *R/R6.R
 57cb8a57506a10283cd5e72b88c8f2aa *R/RC.R
 fe4d1ae94f794f9d779a12727e615545 *R/S4.R
@@ -9,7 +9,7 @@ c0535ce98c1ecbffbe2e998d9f9329c1 *R/cobertura.R
 c37e636967959520dd5c184f839cb6b6 *R/codecov.R
 f1affacc6e86e5d5d75a18f010020590 *R/compiled.R
 2b4fab1967b5b7c4ca7799620380a3b5 *R/coveralls.R
-088654d13240629e03ce1cd7f42de8bd *R/covr.R
+ce5161c27c78ea7951f50be60c644e17 *R/covr.R
 895fa923130cb2b6d323ab46e5620673 *R/data_frame.R
 d16d951012acff271096bc5998284697 *R/display_name.R
 814004717db475dd4aa49840ad02cdc5 *R/exclusions.R
@@ -26,11 +26,11 @@ b3c6bbc3da5554f701a8eadf815140a3 *R/utils.R
 85c5cee1e9ad09fa6b59b892d193edbf *R/value.R
 1bc3c765df66fa716458a0995b66141b *R/vectorized.R
 5d95da6fa4d2682c1cdc1ac95a368d52 *R/zzz.R
-64aed750922e4e3ffa04c627643a0b41 *README.md
-a6899fc5cfbdced1df91915255eec4dd *build/vignette.rds
-644e75b348f6d282a46dd61e70b489d6 *inst/doc/how_it_works.R
+07c04e22e70735a898d5b7066ab9b20d *README.md
+1a26b91ee18c309f69166769799f9a9f *build/vignette.rds
+f3e427932e5e36324eee6d53025a541f *inst/doc/how_it_works.R
 61c2ab959f53b9c0b17c0b85c51995ed *inst/doc/how_it_works.Rmd
-e1cb8c6762868a125508fc6a95f53f5a *inst/doc/how_it_works.html
+fa63d1ff4446da85f60c23b0bd067a90 *inst/doc/how_it_works.html
 418edd361912dbcef364abf7f31ce111 *inst/rstudio/addins.dcf
 e8dceee1ae1addd854285c30b3cdbe5a *inst/www/report.css
 bf3499da1c31113720e9e395691730ba *inst/www/shared/bootstrap/css/bootstrap-theme.min.css
@@ -71,7 +71,7 @@ cf9c3a0ae391a069068a55205fdc5f6d *man/system_output.Rd
 47a37939d9c3f9174e93359f90b36774 *man/value.Rd
 349716ebe58511898a0a70529d65fd86 *man/zero_coverage.Rd
 9b5faf6b0e88dba3955ae3e152bbf5a0 *src/reassign.c
-42f4aa6f83c91955f699e5cd74731d46 *tests/testthat.R
+8f7a6119138d713a935b2139d9155f8c *tests/testthat.R
 ee6ed91c49a7166d886cc55d307486bc *tests/testthat/TestCompiled/DESCRIPTION
 52b588208c260fdf30951177220a12f9 *tests/testthat/TestCompiled/NAMESPACE
 dbd491d4e03b7465c1e5b0382fbcd538 *tests/testthat/TestCompiled/R/TestCompiled.R
@@ -169,7 +169,7 @@ d933b91b609d999bd004269371a5c87f *tests/testthat/test-print.R
 66738651c97526cf0dcb9bbcf2279fba *tests/testthat/test-summary.R
 debbf6685b1bc152a31bbe0fc2d8e11d *tests/testthat/test-tally_coverage.R
 745a56c7247a3f40334b5af7b73105ac *tests/testthat/test-trace_calls.R
-1be25b23e9a5d06b8bcac9c2dac0686f *tests/testthat/test-utils.R
+00fd4444f84d21cc57d925686d1727d3 *tests/testthat/test-utils.R
 3e01dd5c7e5162729420f9be27186db9 *tests/testthat/test-vectorized.R
 430b1a8426fd39113166e3f898c6b2fb *tests/testthat/testFunctional/DESCRIPTION
 a75c6241d729146e8dccca76ba49b2d4 *tests/testthat/testFunctional/NAMESPACE
