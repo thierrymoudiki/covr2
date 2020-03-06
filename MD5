@@ -1,12 +1,12 @@
-aeb6606e1cfec90989a0a2f47de33ca1 *DESCRIPTION
-2bd94cb861992bd4cf850e0ae58a40d5 *NAMESPACE
-4035a99fea9c935a8d3b5c9c1c35012c *NEWS.md
+4ea3018b3facabd308484217337434d2 *DESCRIPTION
+6846dcace708bb9673c909632bfe1baa *NAMESPACE
+1dbc73f563c90bf475e59536c297cfb2 *NEWS.md
 5dfc2a5b79f68471020deae5dab42175 *R/R6.R
 57cb8a57506a10283cd5e72b88c8f2aa *R/RC.R
 fe4d1ae94f794f9d779a12727e615545 *R/S4.R
 2a5f430f278978e5821c674b74374bb9 *R/azure.R
 c0535ce98c1ecbffbe2e998d9f9329c1 *R/cobertura.R
-5cb96d61dba8b587311920bfb1ec4ad3 *R/codecov.R
+a851f3c60d62103bb0b5b960538bd838 *R/codecov.R
 f1affacc6e86e5d5d75a18f010020590 *R/compiled.R
 2b4fab1967b5b7c4ca7799620380a3b5 *R/coveralls.R
 992b8d074416cfacae569beeb7aef128 *R/covr.R
@@ -19,6 +19,7 @@ aa14e2a07e262afa58b1cc9fe8c9f845 *R/parallel.R
 84aecd9d4d1581f704e36b2b4286be7a *R/parse_data.R
 ccc7c7597a35e518560762fa590b611c *R/replace.R
 a6496678afae2f6c90fd79360a36ee03 *R/report.R
+6912245c75f686b986c49d51b41fbe04 *R/sonarqube.R
 b6b379d9f7b1fac9a97dc766e838c636 *R/summary_functions.R
 d53090f734fcaad2fe07fa0b461fed32 *R/system.R
 b9e00d9b2c63de8206e6cd5597fb8c71 *R/trace_calls.R
@@ -26,11 +27,11 @@ b3c6bbc3da5554f701a8eadf815140a3 *R/utils.R
 85c5cee1e9ad09fa6b59b892d193edbf *R/value.R
 1bc3c765df66fa716458a0995b66141b *R/vectorized.R
 5d95da6fa4d2682c1cdc1ac95a368d52 *R/zzz.R
-8a2bdc466b36b5b874211cee3bdb7b78 *README.md
+0f420af6cc196c1d29aec96e8c8ed887 *README.md
 1a26b91ee18c309f69166769799f9a9f *build/vignette.rds
 6eb197937507aac890fd9dc0f0dd719c *inst/doc/how_it_works.R
-61c2ab959f53b9c0b17c0b85c51995ed *inst/doc/how_it_works.Rmd
-2a6f55a26e5e31d94a6c060b26bfa2af *inst/doc/how_it_works.html
+2a28aff31e33bd57a19deee492f9bb35 *inst/doc/how_it_works.Rmd
+73fbfe10eb0715dbc34cff3fc6999a19 *inst/doc/how_it_works.html
 418edd361912dbcef364abf7f31ce111 *inst/rstudio/addins.dcf
 e8dceee1ae1addd854285c30b3cdbe5a *inst/www/report.css
 bf3499da1c31113720e9e395691730ba *inst/www/shared/bootstrap/css/bootstrap-theme.min.css
@@ -44,14 +45,14 @@ a3110de8607cbb9d397295c49f172b00 *inst/www/shared/highlight.js/LICENSE
 bd2c7dfeb3cceac3ea15052ebfa54d42 *man/azure.Rd
 ef8006e213d2b41ff0bb862488ea7d46 *man/clear_counters.Rd
 6c5f4f7ffdb8cb9ea861bae6f80324ad *man/code_coverage.Rd
-6f00fa0db89f0ff9b4ba679ddcfdd761 *man/codecov.Rd
+0608bd72422f8ddc5b95908bf1d5dc99 *man/codecov.Rd
 cf4cf6631eb0a5e3d35dbf4af1503c33 *man/count.Rd
 4d35f99bac7e908d392bf85abe62532d *man/coverage_to_list.Rd
 ab66eff4288cc4ed1876f68190d65fd0 *man/coveralls.Rd
 4a2c78541d1a6747ed01d20a741338fb *man/covr-package.Rd
 2215052194cc0944255e093dc09a850f *man/display_name.Rd
 cf50d209e0bcb9792a95d4e1f61d1a97 *man/environment_coverage.Rd
-cbcd456cada3aec6718bede08d7b84f3 *man/exclusions.Rd
+d3796237b678084bd172961ca88d0006 *man/exclusions.Rd
 85d8633aa4cd886f069b54bbb16b56c4 *man/figures/logo.png
 679afab3352ea5bbcc8ceef148dd716a *man/file_coverage.Rd
 fb456162b2586765463db9fd9451bee4 *man/file_report.Rd
@@ -68,6 +69,7 @@ bc54d041aaf51a79292c0a3a5457f740 *man/new_counter.Rd
 42c64dded60007ba508f9131132482b0 *man/system_output.Rd
 9f78423d195667e73302393fb3913fd7 *man/tally_coverage.Rd
 0725b9c43ea7d194af53e41a1528cec4 *man/to_cobertura.Rd
+1fd55455668b2caa99e5cd5cdb0e0ca6 *man/to_sonarqube.Rd
 09b0861db4aa3607972fa23e0c8b282b *man/trace_calls.Rd
 47a37939d9c3f9174e93359f90b36774 *man/value.Rd
 349716ebe58511898a0a70529d65fd86 *man/zero_coverage.Rd
@@ -144,6 +146,7 @@ d41d8cd98f00b204e9800998ecf8427e *tests/testthat/b
 0d8c58d93552b4e12fcc1424fb39117c *tests/testthat/corner-cases-test.R
 65b7c17ef77e51f59730fb7a2418e6c2 *tests/testthat/corner-cases.R
 ded1683d0674850a66b72eef6816a0ad *tests/testthat/corner-cases.Rds
+5fe7d784f923925b60bac422121cc651 *tests/testthat/sonarqube.xml
 a622d409203310f3d4e197a8303793df *tests/testthat/test-Compiled.R
 48064cb6e610e287dde99cfbea34f9ee *tests/testthat/test-R6.R
 6cbb221a03044d24dd3755d2b5a91a32 *tests/testthat/test-RC.R
@@ -151,7 +154,7 @@ b12dc88cd1f87a5dc1f20debdaca74a7 *tests/testthat/test-S4.R
 db5031b0cef05e175035f0db18f3dbcb *tests/testthat/test-azure.R
 8f177b8bcce5b71d25bcea2ca9d28dda *tests/testthat/test-braceless.R
 dc37fd6a0cc2a93d747dd8f3924f3218 *tests/testthat/test-cobertura.R
-a3724772de9bd4ee59ac8ebc87bcdc5a *tests/testthat/test-codecov.R
+a1337e6fcaebca7d290f97dcbd7d6dc9 *tests/testthat/test-codecov.R
 fcf24a0c9fe124e97a9c60d2895d5f18 *tests/testthat/test-corner-cases.R
 818ea2b2c003e426a161e3b5286b3a77 *tests/testthat/test-coveralls.R
 3099c346295729babafa6cb8e99a88fd *tests/testthat/test-covr.R
@@ -167,6 +170,7 @@ f4887eec7cde42e6dfc7605f0541b925 *tests/testthat/test-parallel.R
 d933b91b609d999bd004269371a5c87f *tests/testthat/test-print.R
 36329342922404c46ad720a1ecea6422 *tests/testthat/test-report.R
 11434ef13120a3e58b28e0d2902ba185 *tests/testthat/test-report.htm
+5f09d07f00b493d0100be06bba7b49e6 *tests/testthat/test-sonarqube.R
 66738651c97526cf0dcb9bbcf2279fba *tests/testthat/test-summary.R
 debbf6685b1bc152a31bbe0fc2d8e11d *tests/testthat/test-tally_coverage.R
 745a56c7247a3f40334b5af7b73105ac *tests/testthat/test-trace_calls.R
@@ -177,4 +181,4 @@ a75c6241d729146e8dccca76ba49b2d4 *tests/testthat/testFunctional/NAMESPACE
 2fa8f4f5e641f8d5660ea254b51e0fda *tests/testthat/testFunctional/R/a.R
 31608be9bc7b1e413ce9b1c3f4cd8ce6 *tests/testthat/testFunctional/tests/testthat.R
 dc6409d0b29cdf517a1bcf950a704788 *tests/testthat/testFunctional/tests/testthat/test-a.R
-61c2ab959f53b9c0b17c0b85c51995ed *vignettes/how_it_works.Rmd
+2a28aff31e33bd57a19deee492f9bb35 *vignettes/how_it_works.Rmd
