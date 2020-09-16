@@ -1,8 +1,8 @@
 #' covr: Test coverage for packages
 #'
 #' covr tracks and reports code coverage for your package and (optionally)
-#' upload the results to a coverage service like 'Codecov' <http://codecov.io> or
-#' 'Coveralls' <http://coveralls.io>. Code coverage is a measure of the amount of
+#' upload the results to a coverage service like 'Codecov' <https://codecov.io> or
+#' 'Coveralls' <https://coveralls.io>. Code coverage is a measure of the amount of
 #' code being exercised by a set of tests. It is an indirect measure of test
 #' quality and completeness. This package is compatible with any testing
 #' methodology or framework and tracks coverage of both R code and compiled
@@ -21,8 +21,6 @@
 #' @importFrom stats aggregate na.omit na.pass setNames
 #' @importFrom utils capture.output getSrcFilename relist str head
 NULL
-
-rex::register_shortcuts("covr")
 
 the <- new.env(parent = emptyenv())
 
@@ -374,7 +372,7 @@ package_coverage <- function(path = ".",
   trace_files <- list.files(path = tmp_lib, pattern = "^covr_trace_[^/]+$", full.names = TRUE)
   coverage <- merge_coverage(trace_files)
   if (!uses_icc()) {
-    res <- run_gcov(pkg$path, quiet = quiet)
+    res <- run_gcov(pkg$path, quiet = quiet, clean = clean)
   } else {
     res <- run_icov(pkg$path, quiet = quiet)
   }
@@ -388,10 +386,19 @@ package_coverage <- function(path = ".",
     attr(coverage, "library") <- tmp_lib
   }
 
-  coverage <- filter_non_package_files(coverage)
+  if (getOption("covr.filter_non_package", TRUE)) {
+    coverage <- filter_non_package_files(coverage)
+  }
 
-  # Exclude both RcppExports to avoid redundant coverage information
-  line_exclusions <- c("src/RcppExports.cpp", "R/RcppExports.R", line_exclusions, parse_covr_ignore())
+  # Exclude generated files from Rcpp and cpp11 to avoid redundant coverage information
+  line_exclusions <- c(
+    "src/RcppExports.cpp",
+    "R/RcppExports.R",
+    "src/cpp11.cpp",
+    "R/cpp11.R",
+    line_exclusions,
+    parse_covr_ignore()
+  )
 
   exclude(coverage,
     line_exclusions = line_exclusions,
