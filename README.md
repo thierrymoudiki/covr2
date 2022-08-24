@@ -1,13 +1,13 @@
 # covr <img src="man/figures/logo.png" align="right" />
 
 <!-- badges: start -->
-[![R build status](https://github.com/r-lib/covr/workflows/R-CMD-check/badge.svg)](https://github.com/r-lib/covr/actions)
-[![Codecov test coverage](https://codecov.io/gh/r-lib/covr/branch/master/graph/badge.svg)](https://codecov.io/gh/r-lib/covr?branch=master)
+[![R-CMD-check](https://github.com/r-lib/covr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-lib/covr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://about.codecov.io/gh/r-lib/covr/branch/master/graph/badge.svg)](https://app.codecov.io/gh/r-lib/covr?branch=master)
 [![CRAN version](http://www.r-pkg.org/badges/version/covr)](https://cran.r-project.org/package=covr)
 <!-- badges: end -->
 
 Track test coverage for your R package and view reports locally or (optionally)
-upload the results to [codecov](https://codecov.io/) or [coveralls](https://coveralls.io/).
+upload the results to [codecov](https://about.codecov.io/) or [coveralls](https://coveralls.io/).
 
 # Installation #
 
@@ -18,11 +18,11 @@ install.packages("covr")
 devtools::install_github("r-lib/covr")
 ```
 
-The easiest way to setup covr on [Travis-CI](https://travis-ci.org)
+The easiest way to setup covr on [Github Actions](https://github.com/r-lib/actions/tree/v2-branch/examples#test-coverage-workflow) 
 is with [usethis](https://github.com/r-lib/usethis).
 
 ```r
-usethis::use_coverage()
+usethis::use_github_action("test-coverage")
 ```
 
 # Usage #
@@ -60,50 +60,6 @@ as.data.frame(cov)
 # uncovered lines.
 zero_coverage(cov)
 ```
-
-# Automated reports
-
-## Codecov ##
-If you are already using [Travis-CI](https://travis-ci.org) add the
-following to your project's `.travis.yml` to track your coverage results
-over time with [Codecov](https://codecov.io).
-
-```yml
-after_success:
-  - Rscript -e 'covr::codecov()'
-```
-
-If you are using [Appveyor CI](http://ci.appveyor.com)  then you can add the
-lines below to your project's `appveyor.yml`:
-
-```yml
-on_success:
-  - Rscript -e "covr::codecov()"
-```
-
-You also need to install covr, either by adding it to the `Suggests:` field of
-your package's `DESCRIPTION` file or also to `Remotes: r-lib/covr` if you want
-to install the development version.
-
-To use other CI services or if you want to upload a coverage report locally you
-can set environment variable `CODECOV_TOKEN` to the token generated on
-the settings page of <https://codecov.io>.
-
-## Coveralls ##
-
-Alternatively you can upload your results to [Coveralls](https://coveralls.io/)
-using `covr::coveralls()`.
-
-```yml
-after_success:
-  - Rscript -e 'covr::coveralls()'
-```
-
-For CI systems not supported by coveralls you need to set the `COVERALLS_TOKEN`
-environment variable. It is wise to use a [Secure Variable](http://docs.travis-ci.com/user/environment-variables/#Secure-Variables)
-so that it is not revealed publicly.
-
-Also you will need to turn on coveralls for your project at <https://coveralls.io/repos>.
 
 # Exclusions #
 
@@ -221,3 +177,7 @@ higher optimization levels).
 # Alternative Coverage Tools #
 - <https://github.com/MangoTheCat/testCoverage> (no longer supported)
 - [**R-coverage**](https://web.archive.org/web/20160611114452/http://r2d2.quartzbio.com/posts/r-coverage-docker.html) (no longer supported)
+
+## Code of Conduct
+
+Please note that the covr project is released with a [Contributor Code of Conduct](https://github.com/r-lib/covr/blob/main/CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.

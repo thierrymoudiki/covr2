@@ -20,7 +20,7 @@
 #' @param pr explicitly set the pr this coverage result object corresponds to,
 #'   this is looked up from the service if it is `NULL`.
 #' @param flags A flag to use for this coverage upload see
-#'   <https://docs.codecov.io/docs/flags> for details.
+#'   <https://docs.codecov.com/docs/flags> for details.
 #' @export
 #' @examples
 #' \dontrun{
@@ -183,6 +183,32 @@ codecov <- function(...,
                           slug = slug,
                           commit = commit %||% Sys.getenv("GITHUB_SHA"))
   # ---------
+  # Google Cloud Build
+  # ---------
+  } else if (nzchar(Sys.getenv("GCB_PROJECT_ID"))) {
+
+    # https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
+    codecov_url <- paste0(base_url, "/upload/v2") # nolint
+
+    build_url <- sprintf("https://console.cloud.google.com/cloud-build/builds/%s?project=%s",
+                         Sys.getenv("GCB_BUILD_ID"), Sys.getenv("GCB_PROJECT_ID"))
+
+    name <- NULL
+    pr <- NULL
+    if(nzchar(Sys.getenv("GCB_TAG_NAME"))) name <- Sys.getenv("GCB_TAG_NAME")
+    if(nzchar(Sys.getenv("GCB_PR_NUMBER"))) pr <- Sys.getenv("GCB_PR_NUMBER")
+
+    codecov_query <- list(
+      branch = branch %||% Sys.getenv("GCB_BRANCH_NAME"),
+      service = "custom",
+      build = Sys.getenv("GCB_BUILD_ID"),
+      build_url = build_url,
+      name = name,
+      pr = pr,
+      commit = commit %||% Sys.getenv("GCB_COMMIT_SHA")
+    )
+
+  # ---------
   # Local GIT
   # ---------
   } else {
@@ -202,7 +228,12 @@ codecov <- function(...,
 
   coverage_json <- to_codecov(coverage)
 
-  httr::content(httr::RETRY("POST", url = codecov_url, query = codecov_query, body = coverage_json, encode = "json", httr::config(http_version = curl_http_1_1())))
+  httr::content(httr::RETRY("POST",
+                            url = codecov_url,
+                            query = codecov_query,
+                            body = coverage_json,
+                            encode = "json",
+                            httr::config(http_version = curl_http_1_1())))
 }
 
 curl_http_1_1 <- function() {
@@ -211,6 +242,10 @@ curl_http_1_1 <- function() {
 }
 
 extract_from_yaml <- function(path){
+  if (is.null(path)) {
+    return("")
+  }
+
   path_to_yaml <- file.path(path, "codecov.yml")
   if (file.exists(path_to_yaml)) {
     yaml::read_yaml(path_to_yaml)[["codecov"]][["token"]] %||% ""

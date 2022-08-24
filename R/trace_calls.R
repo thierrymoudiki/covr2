@@ -101,6 +101,7 @@ trace_calls <- function (x, parent_functions = NULL, parent_ref = NULL) {
 }
 
 .counters <- new.env(parent = emptyenv())
+.current_test <- new.env(parent = emptyenv())
 
 #' initialize a new counter
 #'
@@ -112,6 +113,7 @@ new_counter <- function(src_ref, parent_functions) {
   .counters[[key]]$value <- 0
   .counters[[key]]$srcref <- src_ref
   .counters[[key]]$functions <- parent_functions
+  if (isTRUE(getOption("covr.record_tests", FALSE))) new_test_counter(key)
   key
 }
 
@@ -120,7 +122,8 @@ new_counter <- function(src_ref, parent_functions) {
 #' @param key generated with [key()]
 #' @keywords internal
 count <- function(key) {
-  .counters[[key]]$value <- .counters[[key]]$value + 1
+  .counters[[key]]$value <- .counters[[key]]$value + 1L
+  if (isTRUE(.current_test$record)) count_test(key)
 }
 
 #' clear all previous counters
@@ -128,6 +131,8 @@ count <- function(key) {
 #' @keywords internal
 clear_counters <- function() {
   rm(envir = .counters, list = ls(envir = .counters))
+  rm(envir = .current_test, list = ls(envir = .current_test))
+  .current_test$record <- isTRUE(getOption("covr.record_tests", FALSE))
 }
 
 #' Generate a key for a  call
@@ -136,11 +141,4 @@ clear_counters <- function() {
 #' @keywords internal
 key <- function(x) {
   paste(collapse = ":", c(get_source_filename(x), x))
-}
-
-f1 <- function() {
-  f2 <- function() {
-    2
-  }
-  f2()
 }
