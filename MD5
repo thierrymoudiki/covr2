@@ -1,7 +1,7 @@
-428984c936a261a8556c8fb1be296127 *DESCRIPTION
+f6e667641d42749ff679a0ea79683fbf *DESCRIPTION
 da33a2e9e5e70c8243a5e5045d220b69 *LICENSE
 b0833823fd0ecabec340d06abbee82ca *NAMESPACE
-12bdb8d612a563e49bd18b2afd3becc6 *NEWS.md
+c2a8382a574f50697d85c62df1c6c82c *NEWS.md
 5dfc2a5b79f68471020deae5dab42175 *R/R6.R
 57cb8a57506a10283cd5e72b88c8f2aa *R/RC.R
 fe4d1ae94f794f9d779a12727e615545 *R/S4.R
@@ -30,10 +30,10 @@ bee98795fa4ff5d26c1faff0f64a579b *R/utils.R
 1bc3c765df66fa716458a0995b66141b *R/vectorized.R
 53ce5a8aeb745669b9a31098b2a6113a *R/zzz.R
 04fec1c23f32ac0c88dbf2fc4c51e05c *README.md
-0ff33258cca69e473450e7ec1005d4ae *build/vignette.rds
+ba7f41f980e3c39602df5e37ebe2eb84 *build/vignette.rds
 d0e03dcb45223295110841f3b811ffac *inst/doc/how_it_works.R
 c24d4fadcbd2a4bd05c650ffec3f40b3 *inst/doc/how_it_works.Rmd
-8f83b9ea1c61ea62e3a72aaa009bb7d8 *inst/doc/how_it_works.html
+56d5d18dae69a91476e40a66e0cfad6f *inst/doc/how_it_works.html
 418edd361912dbcef364abf7f31ce111 *inst/rstudio/addins.dcf
 e8dceee1ae1addd854285c30b3cdbe5a *inst/www/report.css
 bf3499da1c31113720e9e395691730ba *inst/www/shared/bootstrap/css/bootstrap-theme.min.css
@@ -200,7 +200,7 @@ a8a6ce47344ea26e717c174b2d00096b *tests/testthat/test-null.R
 a4d3961aab898be84f2cc810305a9e0b *tests/testthat/test-package_coverage.R
 f4887eec7cde42e6dfc7605f0541b925 *tests/testthat/test-parallel.R
 d933b91b609d999bd004269371a5c87f *tests/testthat/test-print.R
-d79d49220cec58ca4b85c2bd4d78b582 *tests/testthat/test-record_tests.R
+811010344a5985f4a7571b7c2312d174 *tests/testthat/test-record_tests.R
 36329342922404c46ad720a1ecea6422 *tests/testthat/test-report.R
 11434ef13120a3e58b28e0d2902ba185 *tests/testthat/test-report.htm
 5f09d07f00b493d0100be06bba7b49e6 *tests/testthat/test-sonarqube.R
