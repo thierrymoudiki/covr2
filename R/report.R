@@ -24,9 +24,9 @@ report <- function(x = package_coverage(),
   if ("htmltools" %in% unique(utils::installed.packages()[,1]))
   {
     utils::remove.packages("htmltools")
-  } else {
-    remotes::install_github("thierrymoudiki/htmltools2")
   }
+  utils::install.packages("DT")
+  remotes::install_github("thierrymoudiki/htmltools2")
   
   if (!(requireNamespace("htmltools", quietly = TRUE) && requireNamespace("DT", quietly = TRUE))) {
     stop("The `DT` and `htmltools` packages must be installed to use `covr::report()`", call. = FALSE)
