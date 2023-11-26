@@ -20,7 +20,14 @@ report <- function(x = package_coverage(),
 
   # Paths need to be absolute for save_html to work properly
   file <- file.path(normalizePath(dirname(file), mustWork = TRUE), basename(file))
-
+  
+  if ("htmltools" %in% unique(utils::installed.packages()[,1]))
+  {
+    utils::remove.packages("htmltools")
+  } else {
+    remotes::install_github("thierrymoudiki/htmltools2")
+  }
+  
   if (!(requireNamespace("htmltools", quietly = TRUE) && requireNamespace("DT", quietly = TRUE))) {
     stop("The `DT` and `htmltools` packages must be installed to use `covr::report()`", call. = FALSE)
   }
